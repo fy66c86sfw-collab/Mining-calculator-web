@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining Toolkit - Complete Pro</title>
+    <title>Mining Toolkit - Drill Deviation</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -13,893 +18,448 @@
             --warning: #f39c12;
             --danger: #e74c3c;
             --light: #ecf0f1;
-            --dark: #34495e;
             --border: #bdc3c7;
-            --sandvik: #FDB913;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--light);
             color: var(--primary);
         }
-        .container { max-width: 800px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
+
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
         .header {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             padding: 20px;
             text-align: center;
         }
-        .header h1 { font-size: 24px; margin-bottom: 5px; }
-        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
-        .screen { display: none; }
-        .screen.active { display: block; }
-        .back-btn { background: none; border: none; color: var(--secondary); cursor: pointer; font-size: 18px; font-weight: 700; margin-bottom: 15px; padding: 0; }
-        .card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--secondary); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .section-title { font-size: 14px; font-weight: 700; margin-top: 15px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--secondary); text-transform: uppercase; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 13px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 6px; font-size: 13px; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--secondary); }
-        .helper-text { font-size: 11px; color: #7f8c8d; margin-top: 3px; font-style: italic; }
-        .drill-selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .drill-option { padding: 12px; border: 2px solid var(--border); border-radius: 6px; cursor: pointer; text-align: center; font-size: 12px; font-weight: 600; transition: all 0.2s; }
-        .drill-option:hover { border-color: var(--secondary); background: #f8f9fa; }
-        .drill-option.selected { border-color: var(--sandvik); background: #fffbf0; }
-        .drill-option-name { font-size: 14px; font-weight: 700; }
-        .drill-option-freq { font-size: 10px; color: #7f8c8d; margin-top: 4px; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--secondary); color: white; margin-top: 12px; }
-        .btn:hover { background: #2980b9; }
-        .result-item { display: flex; justify-content: space-between; padding: 10px; background: var(--light); border-radius: 6px; margin-bottom: 8px; border-left: 3px solid var(--success); font-size: 13px; }
-        .result-value { font-weight: 700; color: var(--success); }
-        .result-item.total { border-left-color: var(--primary); background: #2c3e50; color: white; }
-        .result-item.total .result-value { color: var(--sandvik); font-size: 16px; }
-        .result-item.total .result-label { color: white; font-weight: 700; }
-        .results-section { margin-top: 15px; display: none; }
-        .results-section.show { display: block; }
-        .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 800px; height: 80px; background: white; border-top: 2px solid var(--border); display: flex; justify-content: space-around; z-index: 1000; }
-        .tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; color: #7f8c8d; flex: 1; }
-        .tab-item.active { color: var(--secondary); }
-        .menu-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .menu-card { padding: 20px; border: 2px solid var(--border); border-radius: 8px; background: white; cursor: pointer; text-align: center; font-weight: 600; transition: all 0.2s; }
-        .menu-card:hover { border-color: var(--secondary); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .menu-icon { font-size: 32px; margin-bottom: 10px; }
-        .drill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .drill-card { padding: 12px; border: 2px solid var(--sandvik); border-radius: 6px; background: white; cursor: pointer; text-align: center; }
-        .drill-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .drill-card-name { font-weight: 700; margin-bottom: 4px; }
-        .drill-card-type { font-size: 11px; color: #7f8c8d; }
-        .spec-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
-        .spec-tab { padding: 8px 12px; border: none; background: none; cursor: pointer; font-weight: 600; color: #7f8c8d; border-bottom: 2px solid transparent; white-space: nowrap; }
-        .spec-tab.active { color: var(--secondary); border-bottom-color: var(--secondary); }
-        .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .spec-item { padding: 10px; background: var(--light); border-radius: 6px; }
-        .spec-label { font-size: 11px; font-weight: 600; color: #7f8c8d; display: block; margin-bottom: 4px; }
-        .spec-value { font-size: 13px; font-weight: 700; color: var(--primary); }
-        .conversion-section { padding: 12px; background: var(--light); border-radius: 6px; margin-bottom: 12px; }
-        .conversion-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
-        .conversion-input { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; }
-        .conversion-result { padding: 8px; background: white; border-radius: 4px; font-weight: 600; color: var(--success); font-size: 12px; }
-        .info-box { background: #e8f4f8; border: 1px solid #3498db; border-radius: 6px; padding: 10px; margin-bottom: 12px; font-size: 12px; color: var(--primary); }
-        .info-box strong { color: var(--secondary); }
-        .coordinate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .coordinate-result { padding: 12px; background: var(--light); border-radius: 6px; text-align: center; }
-        .coordinate-label { font-size: 11px; font-weight: 600; color: #7f8c8d; display: block; margin-bottom: 4px; }
-        .coordinate-value { font-size: 14px; font-weight: 700; color: var(--success); }
-        h2 { font-size: 18px; margin-bottom: 15px; }
-        h3 { font-size: 14px; margin-bottom: 10px; font-weight: 700; }
-        .result-label { font-weight: 600; color: #7f8c8d; }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 20px;
+            padding-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding: 0;
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--secondary);
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .helper-text {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 3px;
+            font-style: italic;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--secondary);
+            color: white;
+            margin-top: 12px;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: var(--light);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--success);
+            font-size: 13px;
+        }
+
+        .result-item.total {
+            border-left-color: var(--primary);
+            background: #2c3e50;
+            color: white;
+        }
+
+        .result-item.total .result-value {
+            color: #FDB913;
+            font-size: 16px;
+        }
+
+        .result-item.total .result-label {
+            color: white;
+            font-weight: 700;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .result-value span {
+            font-size: 11px;
+            color: #7f8c8d;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .results-section {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border: 1px solid #3498db;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .info-box strong {
+            color: var(--secondary);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .coordinate-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .coordinate-result {
+            padding: 12px;
+            background: var(--light);
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .coordinate-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #7f8c8d;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .coordinate-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--success);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
         <div class="header">
-            <h1>⛏️ Mining Toolkit Pro</h1>
-            <p>Complete Mining Calculations & Equipment Specs</p>
+            <h1>Mining Toolkit Pro</h1>
         </div>
 
         <div class="content">
-            <!-- HOME SCREEN -->
-            <div id="screen-home" class="screen active">
+            <button class="back-btn" onclick="window.location.href='calculators.html'">← Back</button>
+
+            <div class="card">
+                <h2>Drill Deviation Calculator</h2>
+                <p style="font-size: 12px; color: #7f8c8d; margin-bottom: 12px;">Calculate toe points and hole separation for long-hole drilling accuracy.</p>
+
+                <div class="info-box">
+                    <strong>Coordinate System</strong>
+                    E = Easting (East-West)<br>
+                    N = Northing (North-South)<br>
+                    Z = Elevation (Vertical)
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">Drill Hole 1</div>
+
+                <div class="form-group">
+                    <label for="dev-length1">Length (meters)</label>
+                    <input type="number" id="dev-length1" value="30" step="0.1" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="dev-azimuth1">Azimuth (degrees)</label>
+                    <input type="number" id="dev-azimuth1" value="0" step="0.1" min="0" max="360">
+                    <p class="helper-text">0 = North, 90 = East, 180 = South, 270 = West</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="dev-dip1">Dip (degrees)</label>
+                    <input type="number" id="dev-dip1" value="-45" step="0.1" min="-90" max="90">
+                    <p class="helper-text">Negative = downward, 0 = horizontal, 90 = vertical up</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">Drill Hole 2</div>
+
+                <div class="form-group">
+                    <label for="dev-length2">Length (meters)</label>
+                    <input type="number" id="dev-length2" value="30" step="0.1" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="dev-azimuth2">Azimuth (degrees)</label>
+                    <input type="number" id="dev-azimuth2" value="0.2" step="0.1" min="0" max="360">
+                    <p class="helper-text">0 = North, 90 = East, 180 = South, 270 = West</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="dev-dip2">Dip (degrees)</label>
+                    <input type="number" id="dev-dip2" value="-46" step="0.1" min="-90" max="90">
+                    <p class="helper-text">Negative = downward, 0 = horizontal, 90 = vertical up</p>
+                </div>
+
+                <button class="btn" onclick="calculateDeviation()">Calculate Toe Points</button>
+            </div>
+
+            <!-- RESULTS SECTION -->
+            <div id="dev-results" class="results-section">
                 <div class="card">
-                    <h2>Welcome</h2>
-                    <p style="font-size: 13px; margin-bottom: 12px;">Professional mining toolkit with advanced calculators, comprehensive drill specifications, and unit conversion tools.</p>
+                    <div class="section-title">Drill Hole 1 Toe Point</div>
+
+                    <div class="coordinate-grid">
+                        <div class="coordinate-result">
+                            <span class="coordinate-label">Easting E</span>
+                            <span class="coordinate-value" id="dev-toe1-e">0.0000</span>
+                        </div>
+                        <div class="coordinate-result">
+                            <span class="coordinate-label">Northing N</span>
+                            <span class="coordinate-value" id="dev-toe1-n">0.0000</span>
+                        </div>
+                        <div class="coordinate-result">
+                            <span class="coordinate-label">Elevation Z</span>
+                            <span class="coordinate-value" id="dev-toe1-z">0.0000</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="menu-cards">
-                    <div class="menu-card" onclick="goTo('screen-calculators')">
-                        <div class="menu-icon">🧮</div>
-                        Calculators
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-drills')">
-                        <div class="menu-icon">🔧</div>
-                        Drill Specs
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-converter')">
-                        <div class="menu-icon">📏</div>
-                        Converter
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-settings')">
-                        <div class="menu-icon">⚙️</div>
-                        Settings
-                    </div>
-                </div>
-            </div>
-
-            <!-- CALCULATORS MENU -->
-            <div id="screen-calculators" class="screen">
-                <button class="back-btn" onclick="goTo('screen-home')">← Back</button>
-                <h2>Calculators</h2>
-                <div class="menu-cards">
-                    <div class="menu-card" onclick="goTo('screen-drilling-rpm')">
-                        <div class="menu-icon">⚙️</div>
-                        RPM Calculator
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-drill-deviation')">
-                        <div class="menu-icon">📍</div>
-                        Drill Deviation
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-groundsupport')">
-                        <div class="menu-icon">🔨</div>
-                        Ground Support
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-mucking')">
-                        <div class="menu-icon">🪣</div>
-                        Mucking
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-shotcrete')">
-                        <div class="menu-icon">💧</div>
-                        Shotcrete
-                    </div>
-                </div>
-            </div>
-
-            <!-- DRILL DEVIATION CALCULATOR -->
-            <div id="screen-drill-deviation" class="screen">
-                <button class="back-btn" onclick="goTo('screen-calculators')">← Back</button>
                 <div class="card">
-                    <h2>Drill Deviation Calculator</h2>
-                    <p style="font-size: 12px; color: #7f8c8d; margin-bottom: 12px;">Calculate toe points and hole separation for long-hole drilling accuracy.</p>
+                    <div class="section-title">Drill Hole 2 Toe Point</div>
 
-                    <div class="info-box">
-                        <strong>Coordinate System:</strong><br>
-                        E = Easting (East-West)<br>
-                        N = Northing (North-South)<br>
-                        Z = Elevation (Vertical)
-                    </div>
-
-                    <div class="section-title">Drill Hole 1</div>
-                    <div class="form-group">
-                        <label>Length (meters)</label>
-                        <input type="number" id="dev-length1" value="30" step="0.1" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Azimuth (degrees)</label>
-                        <input type="number" id="dev-azimuth1" value="0" step="0.1" min="0" max="360">
-                        <p class="helper-text">0° = North, 90° = East, 180° = South, 270° = West</p>
-                    </div>
-                    <div class="form-group">
-                        <label>Dip (degrees)</label>
-                        <input type="number" id="dev-dip1" value="-45" step="0.1" min="-90" max="90">
-                        <p class="helper-text">Negative = downward, 0° = horizontal, 90° = vertical up</p>
-                    </div>
-
-                    <div class="section-title">Drill Hole 2</div>
-                    <div class="form-group">
-                        <label>Length (meters)</label>
-                        <input type="number" id="dev-length2" value="30" step="0.1" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Azimuth (degrees)</label>
-                        <input type="number" id="dev-azimuth2" value="0.2" step="0.1" min="0" max="360">
-                    </div>
-                    <div class="form-group">
-                        <label>Dip (degrees)</label>
-                        <input type="number" id="dev-dip2" value="-46" step="0.1" min="-90" max="90">
-                    </div>
-
-                    <button class="btn" onclick="calculateDeviation()">Calculate Toe Points</button>
-
-                    <div id="dev-results" class="results-section">
-                        <div class="section-title">Drill Hole 1 Toe Point</div>
-                        <div class="coordinate-grid">
-                            <div class="coordinate-result">
-                                <div class="coordinate-label">Easting (E)</div>
-                                <div class="coordinate-value" id="dev-toe1-e">0.0000</div>
-                            </div>
-                            <div class="coordinate-result">
-                                <div class="coordinate-label">Northing (N)</div>
-                                <div class="coordinate-value" id="dev-toe1-n">0.0000</div>
-                            </div>
-                            <div class="coordinate-result">
-                                <div class="coordinate-label">Elevation (Z)</div>
-                                <div class="coordinate-value" id="dev-toe1-z">0.0000</div>
-                            </div>
+                    <div class="coordinate-grid">
+                        <div class="coordinate-result">
+                            <span class="coordinate-label">Easting E</span>
+                            <span class="coordinate-value" id="dev-toe2-e">0.0000</span>
                         </div>
-
-                        <div class="section-title">Drill Hole 2 Toe Point</div>
-                        <div class="coordinate-grid">
-                            <div class="coordinate-result">
-                                <div class="coordinate-label">Easting (E)</div>
-                                <div class="coordinate-value" id="dev-toe2-e">0.0000</div>
-                            </div>
-                            <div class="coordinate-result">
-                                <div class="coordinate-label">Northing (N)</div>
-                                <div class="coordinate-value" id="dev-toe2-n">0.0000</div>
-                            </div>
-                            <div class="coordinate-result">
-                                <div class="coordinate-label">Elevation (Z)</div>
-                                <div class="coordinate-value" id="dev-toe2-z">0.0000</div>
-                            </div>
+                        <div class="coordinate-result">
+                            <span class="coordinate-label">Northing N</span>
+                            <span class="coordinate-value" id="dev-toe2-n">0.0000</span>
                         </div>
-
-                        <div class="section-title">Separation & Deviation</div>
-                        <div class="result-item">
-                            <span class="result-label">East Difference (ΔE)</span>
-                            <span class="result-value" id="dev-delta-e">0.0000 m</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">North Difference (ΔN)</span>
-                            <span class="result-value" id="dev-delta-n">0.0000 m</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Elevation Difference (ΔZ)</span>
-                            <span class="result-value" id="dev-delta-z">0.0000 m</span>
-                        </div>
-                        <div class="result-item" style="border-left-color: var(--warning);">
-                            <span class="result-label">Horizontal Separation</span>
-                            <span class="result-value" id="dev-horiz-sep">0.0000 m</span>
-                        </div>
-                        <div class="result-item" style="border-left-color: var(--danger);">
-                            <span class="result-label">3D Distance (Gap)</span>
-                            <span class="result-value" id="dev-3d-distance">0.0000 m</span>
-                        </div>
-                        <div class="result-item total">
-                            <span class="result-label">📊 TOTAL DIFFERENCE</span>
-                            <span class="result-value" id="dev-total-diff">0.0000 m</span>
+                        <div class="coordinate-result">
+                            <span class="coordinate-label">Elevation Z</span>
+                            <span class="coordinate-value" id="dev-toe2-z">0.0000</span>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- RPM CALCULATOR -->
-            <div id="screen-drilling-rpm" class="screen">
-                <button class="back-btn" onclick="goTo('screen-calculators')">← Back</button>
                 <div class="card">
-                    <h2>RPM Calculator</h2>
+                    <div class="section-title">Separation Deviation</div>
 
-                    <div class="section-title">Select Rock Drill</div>
-                    <div class="drill-selector-grid" id="drill-selector">
-                        <!-- Populated by JS -->
+                    <div class="result-item">
+                        <span class="result-label">East Difference (E)</span>
+                        <span class="result-value" id="dev-delta-e">0.0000 <span>m</span></span>
                     </div>
 
-                    <div id="drill-params" style="display:none;">
-                        <div class="section-title">Drilling Parameters</div>
-                        <div class="form-group">
-                            <label for="bit-diameter">Bit Diameter (mm)</label>
-                            <select id="bit-diameter" onchange="updateDrillCalc()">
-                                <!-- Populated by JS -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="rock-type">Rock Type</label>
-                            <select id="rock-type" onchange="updateDrillCalc()">
-                                <option value="soft">Soft Rock (Indexing: 5-6 mm)</option>
-                                <option value="medium" selected>Medium Rock (Indexing: 7-8 mm)</option>
-                                <option value="hard">Hard Rock (Indexing: 9-10 mm)</option>
-                            </select>
-                        </div>
+                    <div class="result-item">
+                        <span class="result-label">North Difference (N)</span>
+                        <span class="result-value" id="dev-delta-n">0.0000 <span>m</span></span>
                     </div>
 
-                    <button class="btn" onclick="calculateRPM()">Calculate Optimal RPM</button>
+                    <div class="result-item">
+                        <span class="result-label">Elevation Difference (Z)</span>
+                        <span class="result-value" id="dev-delta-z">0.0000 <span>m</span></span>
+                    </div>
 
-                    <div id="rpm-results" class="results-section">
-                        <div class="result-item">
-                            <span class="result-label">Drill Model</span>
-                            <span class="result-value" id="rpm-model">-</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Frequency</span>
-                            <span class="result-value" id="rpm-freq">- Hz</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Recommended RPM</span>
-                            <span class="result-value" id="rpm-value">0 RPM</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Bit Circumference</span>
-                            <span class="result-value" id="rpm-circumference">0 mm</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Impact Spacing</span>
-                            <span class="result-value" id="rpm-spacing">0 mm</span>
-                        </div>
+                    <div class="result-item" style="border-left-color: var(--warning);">
+                        <span class="result-label">Horizontal Separation</span>
+                        <span class="result-value" id="dev-horiz-sep">0.0000 <span>m</span></span>
+                    </div>
+
+                    <div class="result-item" style="border-left-color: var(--danger);">
+                        <span class="result-label">3D Distance Gap</span>
+                        <span class="result-value" id="dev-3d-distance">0.0000 <span>m</span></span>
+                    </div>
+
+                    <div class="result-item total">
+                        <span class="result-label">TOTAL DIFFERENCE</span>
+                        <span class="result-value" id="dev-total-diff">0.0000 <span>m</span></span>
                     </div>
                 </div>
-            </div>
-
-            <!-- GROUND SUPPORT CALCULATOR -->
-            <div id="screen-groundsupport" class="screen">
-                <button class="back-btn" onclick="goTo('screen-calculators')">← Back</button>
-                <div class="card">
-                    <h2>Ground Support Bolting</h2>
-
-                    <div class="section-title">Drift Dimensions</div>
-                    <div class="form-group">
-                        <label>Drift Width (m)</label>
-                        <input type="number" id="gs-width" value="5.0" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Drift Height (m)</label>
-                        <input type="number" id="gs-height" value="5.0" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Drift Depth (m)</label>
-                        <input type="number" id="gs-depth" value="5.0" step="0.1">
-                    </div>
-
-                    <div class="section-title">Bolt Configuration</div>
-                    <div class="form-group">
-                        <label>Pattern Type</label>
-                        <select id="gs-pattern">
-                            <option value="dice5" selected>Dice 5</option>
-                            <option value="grid">Grid</option>
-                            <option value="staggered">Staggered</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Spacing Width (m)</label>
-                        <input type="number" id="gs-spacing-w" value="1.0" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Spacing Depth (m)</label>
-                        <input type="number" id="gs-spacing-d" value="1.0" step="0.1">
-                    </div>
-
-                    <div class="section-title">Screen Specifications</div>
-                    <div class="form-group">
-                        <label>Screen Width (m)</label>
-                        <input type="number" id="gs-screen-w" value="2.44" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label>Screen Length (m)</label>
-                        <input type="number" id="gs-screen-l" value="4.27" step="0.01">
-                    </div>
-
-                    <button class="btn" onclick="calculateGroundSupport()">Calculate</button>
-
-                    <div id="gs-results" class="results-section">
-                        <div class="result-item">
-                            <span class="result-label">Total Screens</span>
-                            <span class="result-value" id="gs-screens">0</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Total Bolts</span>
-                            <span class="result-value" id="gs-bolts">0</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Bolt Plates</span>
-                            <span class="result-value" id="gs-plates">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MUCKING CALCULATOR -->
-            <div id="screen-mucking" class="screen">
-                <button class="back-btn" onclick="goTo('screen-calculators')">← Back</button>
-                <div class="card">
-                    <h2>Mucking Calculator</h2>
-
-                    <div class="section-title">Drift Profile</div>
-                    <div class="form-group">
-                        <label>Width (m)</label>
-                        <input type="number" id="muck-w" value="5" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Height (m)</label>
-                        <input type="number" id="muck-h" value="5" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Depth (m)</label>
-                        <input type="number" id="muck-d" value="5" step="0.1">
-                    </div>
-
-                    <div class="section-title">Bucket Size</div>
-                    <div class="form-group">
-                        <label>Bucket Size (yd³)</label>
-                        <input type="number" id="muck-bucket" value="10" step="0.5">
-                        <p class="helper-text">10 yd³ = 7.65 m³</p>
-                    </div>
-
-                    <button class="btn" onclick="calculateMucking()">Calculate</button>
-
-                    <div id="muck-results" class="results-section">
-                        <div class="result-item">
-                            <span class="result-label">Drift Volume</span>
-                            <span class="result-value" id="muck-volume">0 m³</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Buckets Needed</span>
-                            <span class="result-value" id="muck-buckets">0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SHOTCRETE CALCULATOR -->
-            <div id="screen-shotcrete" class="screen">
-                <button class="back-btn" onclick="goTo('screen-calculators')">← Back</button>
-                <div class="card">
-                    <h2>Shotcrete Calculator</h2>
-
-                    <div class="section-title">Drift Dimensions</div>
-                    <div class="form-group">
-                        <label>Width (m)</label>
-                        <input type="number" id="shot-w" value="5" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Height (m)</label>
-                        <input type="number" id="shot-h" value="5" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Depth (m)</label>
-                        <input type="number" id="shot-d" value="5" step="0.1">
-                    </div>
-
-                    <div class="section-title">Shotcrete Thickness</div>
-                    <div class="form-group">
-                        <label>Back Thickness (cm)</label>
-                        <input type="number" id="shot-back" value="3" step="0.5" min="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Wall Thickness (cm)</label>
-                        <input type="number" id="shot-wall" value="3" step="0.5" min="0.1">
-                    </div>
-
-                    <button class="btn" onclick="calculateShotcrete()">Calculate</button>
-
-                    <div id="shot-results" class="results-section">
-                        <div class="result-item">
-                            <span class="result-label">Back Volume</span>
-                            <span class="result-value" id="shot-back-vol">0 m³</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Wall Volume</span>
-                            <span class="result-value" id="shot-wall-vol">0 m³</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="result-label">Total Volume</span>
-                            <span class="result-value" id="shot-total-vol">0 m³</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DRILL SPECS MENU -->
-            <div id="screen-drills" class="screen">
-                <button class="back-btn" onclick="goTo('screen-home')">← Back</button>
-                <h2>Drill Specifications</h2>
-                <div class="menu-cards">
-                    <div class="menu-card" onclick="goTo('screen-drills-longhole')">
-                        <div class="menu-icon">🔩</div>
-                        Long-Hole<br><span style="font-size:11px;">4 Models</span>
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-drills-jumbos')">
-                        <div class="menu-icon">🔨</div>
-                        Jumbos<br><span style="font-size:11px;">5 Models</span>
-                    </div>
-                    <div class="menu-card" onclick="goTo('screen-drills-bolters')">
-                        <div class="menu-icon">🔧</div>
-                        Bolters<br><span style="font-size:11px;">4 Models</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- LONG-HOLE DRILLS -->
-            <div id="screen-drills-longhole" class="screen">
-                <button class="back-btn" onclick="goTo('screen-drills')">← Back</button>
-                <h2>Long-Hole Drills (DL)</h2>
-                <div class="drill-grid" id="drills-longhole"></div>
-            </div>
-
-            <!-- JUMBOS -->
-            <div id="screen-drills-jumbos" class="screen">
-                <button class="back-btn" onclick="goTo('screen-drills')">← Back</button>
-                <h2>Jumbo Drills (DD)</h2>
-                <div class="drill-grid" id="drills-jumbos"></div>
-            </div>
-
-            <!-- BOLTERS -->
-            <div id="screen-drills-bolters" class="screen">
-                <button class="back-btn" onclick="goTo('screen-drills')">← Back</button>
-                <h2>Bolter Drills (DS)</h2>
-                <div class="drill-grid" id="drills-bolters"></div>
-            </div>
-
-            <!-- DRILL DETAIL -->
-            <div id="screen-drill-detail" class="screen">
-                <button class="back-btn" onclick="goBack()">← Back</button>
-                <h2 id="detail-title">Drill Specs</h2>
-
-                <div class="spec-tabs" id="spec-tabs">
-                    <button class="spec-tab active" onclick="switchTab('overview')">Overview</button>
-                    <button class="spec-tab" onclick="switchTab('rockdrill')">Rock Drill</button>
-                    <button class="spec-tab" onclick="switchTab('hydraulic')">Hydraulic</button>
-                    <button class="spec-tab" onclick="switchTab('carrier')">Carrier</button>
-                    <button class="spec-tab" onclick="switchTab('dimensions')">Dimensions</button>
-                </div>
-
-                <div id="detail-content" class="card"></div>
-            </div>
-
-            <!-- UNIT CONVERTER -->
-            <div id="screen-converter" class="screen">
-                <button class="back-btn" onclick="goTo('screen-home')">← Back</button>
-                <div class="card">
-                    <h2>Unit Converter</h2>
-
-                    <div class="section-title">Length Conversion</div>
-                    <div class="conversion-section">
-                        <div class="conversion-item">
-                            <input type="number" id="conv-input" placeholder="Enter value" class="conversion-input" oninput="convertUnits()">
-                            <select id="conv-from" onchange="convertUnits()">
-                                <option value="m">Meter (m)</option>
-                                <option value="ft">Foot (ft)</option>
-                                <option value="mm">Millimeter (mm)</option>
-                                <option value="cm">Centimeter (cm)</option>
-                                <option value="in">Inch (in)</option>
-                                <option value="yd">Yard (yd)</option>
-                            </select>
-                        </div>
-                        <div style="text-align: center; margin: 8px 0;">↓</div>
-                        <div class="conversion-item">
-                            <div id="conv-output" class="conversion-result">0</div>
-                            <select id="conv-to" onchange="convertUnits()">
-                                <option value="ft">Foot (ft)</option>
-                                <option value="m">Meter (m)</option>
-                                <option value="mm">Millimeter (mm)</option>
-                                <option value="cm">Centimeter (cm)</option>
-                                <option value="in">Inch (in)</option>
-                                <option value="yd">Yard (yd)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="section-title">Volume Conversion</div>
-                    <div class="conversion-section">
-                        <div class="conversion-item">
-                            <input type="number" id="vol-input" placeholder="Enter value" class="conversion-input" oninput="convertVolume()">
-                            <select id="vol-from" onchange="convertVolume()">
-                                <option value="m3">Cubic Meter (m³)</option>
-                                <option value="yd3">Cubic Yard (yd³)</option>
-                                <option value="l">Liter (L)</option>
-                            </select>
-                        </div>
-                        <div style="text-align: center; margin: 8px 0;">↓</div>
-                        <div class="conversion-item">
-                            <div id="vol-output" class="conversion-result">0</div>
-                            <select id="vol-to" onchange="convertVolume()">
-                                <option value="yd3">Cubic Yard (yd³)</option>
-                                <option value="m3">Cubic Meter (m³)</option>
-                                <option value="l">Liter (L)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SETTINGS -->
-            <div id="screen-settings" class="screen">
-                <button class="back-btn" onclick="goTo('screen-home')">← Back</button>
-                <div class="card">
-                    <h2>Settings</h2>
-
-                    <div class="section-title">Unit System</div>
-                    <div class="form-group">
-                        <label>Default Unit System</label>
-                        <select id="unit-system" onchange="saveSettings()">
-                            <option value="metric">Metric (m, mm, cm)</option>
-                            <option value="imperial">Imperial (ft, in)</option>
-                        </select>
-                    </div>
-
-                    <div class="section-title">Default Drill Model</div>
-                    <div class="form-group">
-                        <label>Drilling RPM Calculator</label>
-                        <select id="default-drill" onchange="saveSettings()">
-                            <option value="dd422i">DD422i (Jumbo - 93 Hz)</option>
-                            <option value="dl422i">DL422i (Long-Hole - 42 Hz)</option>
-                            <option value="ds412ie">DS412iE (Bolter - 110 Hz)</option>
-                        </select>
-                    </div>
-
-                    <div class="section-title">About</div>
-                    <p style="font-size:12px; color:#7f8c8d;">
-                        <strong>Mining Toolkit Pro v2.2</strong><br>
-                        Complete mining calculation and equipment reference system.<br><br>
-                        Includes:<br>
-                        • Advanced drilling calculators<br>
-                        • Drill deviation & accuracy tools<br>
-                        • Ground support calculations<br>
-                        • Complete drill specifications (14 models)<br>
-                        • Unit conversion tools<br><br>
-                        All specifications derived from official Sandvik datasheets.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-bar">
-            <div class="tab-item active" onclick="goTo('screen-home')">
-                <div style="font-size:20px;">🏠</div>
-                <div style="font-size:11px;font-weight:500;">Home</div>
-            </div>
-            <div class="tab-item" onclick="goTo('screen-calculators')">
-                <div style="font-size:20px;">🧮</div>
-                <div style="font-size:11px;font-weight:500;">Calc</div>
-            </div>
-            <div class="tab-item" onclick="goTo('screen-drills')">
-                <div style="font-size:20px;">🔧</div>
-                <div style="font-size:11px;font-weight:500;">Drills</div>
-            </div>
-            <div class="tab-item" onclick="goTo('screen-converter')">
-                <div style="font-size:20px;">📏</div>
-                <div style="font-size:11px;font-weight:500;">Convert</div>
-            </div>
-            <div class="tab-item" onclick="goTo('screen-settings')">
-                <div style="font-size:20px;">⚙️</div>
-                <div style="font-size:11px;font-weight:500;">Settings</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Drill Data with COMPLETE specifications
-        const drillData = {
-            longhole: [
-                { id: 'dl421', model: 'DL421', company: 'Sandvik', category: 'Automated Long-Hole', freq: 40, maxRPM: 100, bitDiameters: [64, 89, 102, 115], specs: { overview: { 'Rock Drill': 'HL1560ST', 'Automation': 'Fully Automated', 'Application': 'Mass Mining', 'Minimum Drift': '3.6 x 3.6 m' }, rockdrill: { 'Model': 'HL1560ST', 'Percussion Power': '33 kW', 'Percussion Rate': '30-40 Hz', 'Max Pressure': '200 bar', 'Rotation Speed': '0-100 RPM', 'Torque': '2,330 Nm', 'Weight': '490 kg' }, hydraulic: { 'Powerpack': 'HPP1590 • 90 kW', 'Oil Tank': '270 L', 'Cooler': '45 kW (OW45)', 'Pump': 'Variable displacement' }, carrier: { 'Engine': 'MB OM904LA • 110 kW', 'Tramming Speed': '15 km/h', 'Carrier': 'NC7W', 'Drive': '4-wheel drive' }, dimensions: { 'Transport Width': '2,450 mm', 'Transport Height': '3,000 mm', 'Transport Length': '11,700 mm', 'Total Weight': '22,000 kg' } } },
-                { id: 'dl422i', model: 'DL422i', company: 'Sandvik', category: 'Fully Automated i-Class', freq: 42, maxRPM: 100, bitDiameters: [89, 102, 127], specs: { overview: { 'Rock Drill': 'HF1560ST', 'Automation': 'Fully Automated (Platinum)', 'Application': 'Mass Mining', 'Max Depth': '54.6 m' }, rockdrill: { 'Model': 'HF1560ST', 'Percussion Power': '33 kW', 'Percussion Rate': '40-45 Hz', 'Max Pressure': '200 bar', 'Rotation Speed': '0-100 RPM', 'Torque': '2,330 Nm (OMT500)', 'Feed Force': '31 kN' }, hydraulic: { 'Powerpack': 'HPP1590 • 90 kW', 'Oil Tank': '270 L', 'Cooler': '45 kW', 'System': 'Load-sensing proportional' }, carrier: { 'Engine': 'Cummins QSB4.5 • 119 kW', 'Carrier': 'C400D', 'Tramming Speed': '12 km/h', 'Transmission': '4x4 Articular' }, dimensions: { 'Transport Width': '2,500 mm', 'Transport Height': '3,050 mm', 'Transport Length': '11,850 mm', 'Total Weight': '22,000 kg' } } },
-                { id: 'dl422ie', model: 'DL422iE', company: 'Sandvik', category: 'Electric i-Class', freq: 42, maxRPM: 100, bitDiameters: [89, 102, 127], specs: { overview: { 'Rock Drill': 'HF1560ST', 'Drive': 'Electric Motor (Inverter)', 'Emissions': 'ZERO Diesel', 'Max Depth': '54.6 m' }, rockdrill: { 'Model': 'HF1560ST', 'Percussion Power': '33 kW', 'Percussion Rate': '40-45 Hz', 'Max Pressure': '200 bar', 'Torque': '2,330 Nm', 'Weight': '490 kg', 'Control': 'iSOLO SICA' }, hydraulic: { 'System Pressure': '200 bar max', 'Pump': 'Variable displacement', 'Cooler': '45 kW oil-to-water', 'Tank': '270 L' }, carrier: { 'Drive Type': 'Electric Motor + Mechanical Link', 'Total Power': '205 kW', 'Voltage': '380-1000 V (50/60 Hz)', 'Transmission': '4-wheel drive (Electric)' }, dimensions: { 'Transport Width': '2,500 mm', 'Transport Height': '3,050 mm', 'Transport Length': '11,850 mm', 'Total Weight': '24,000+ kg' } } },
-                { id: 'dl432i', model: 'DL432i', company: 'Sandvik', category: 'Advanced i-Class', freq: 60, maxRPM: 200, bitDiameters: [64, 89, 102], specs: { overview: { 'Rock Drill': 'RD927L', 'Category': 'Compact Long-Hole', 'Application': 'Mass Mining', 'Max Depth': '38 m' }, rockdrill: { 'Model': 'RD927L', 'Percussion Power': '27 kW', 'Percussion Rate': '60 Hz', 'Max Pressure': '210 bar', 'Rotation Speed': '0-200 RPM', 'Torque': '1,750 Nm (OMT315)', 'Weight': '385 kg' }, hydraulic: { 'Powerpack': 'HPP1590 • 75 kW', 'Oil Tank': '270 L', 'Cooler': '35 kW', 'System': 'Load-sensing proportional' }, carrier: { 'Engine': 'Cummins QSB4.5 • 119 kW', 'Carrier': 'C400D (Compact)', 'Tramming Speed': '12 km/h', 'Minimum Drift': '3.4 x 3.4 m' }, dimensions: { 'Transport Width': '2,450 mm', 'Transport Height': '3,000 mm', 'Transport Length': '11,700 mm', 'Total Weight': '26,500 kg' } } }
-            ],
-            jumbos: [
-                { id: 'dd210', model: 'DD210', company: 'Sandvik', category: 'Compact Development', freq: 100, maxRPM: 320, bitDiameters: [43, 51, 64], specs: { overview: { 'Rock Drill': 'RDX5', 'Category': 'Compact Jumbo', 'Coverage': '24 m parallel', 'Drift Size': '2.5 x 2.5 m' }, rockdrill: { 'Model': 'RDX5', 'Percussion Power': '20 kW', 'Percussion Rate': '67 Hz', 'Max Pressure': '220 bar', 'Rotation Speed': '0-250 RPM (OMS80)', 'Torque': '400 Nm', 'Weight': '180 kg' }, hydraulic: { 'Powerpack': 'HPP575 • 50 kW', 'Oil Tank': '200 L', 'Cooler': '25 kW', 'Pump': 'Variable displacement' }, carrier: { 'Engine': 'Deutz D914L04 • 55 kW', 'Carrier': 'TCQ (Frame-steered)', 'Tramming Speed': '6.5 km/h', 'Drive': '4-wheel drive' }, dimensions: { 'Transport Width': '2,100 mm', 'Transport Height': '2,800 mm', 'Transport Length': '11,500 mm', 'Total Weight': '9,100 kg' } } },
-                { id: 'dd322i', model: 'DD322i', company: 'Sandvik', category: 'Twin Boom i-Class', freq: 105, maxRPM: 350, bitDiameters: [43, 51, 64], specs: { overview: { 'Rock Drill': 'RD525', 'Boom Configuration': 'Twin Boom (SB55i)', 'Coverage': '54 m parallel', 'Control': 'BCWT (Boom Control While Tramming)' }, rockdrill: { 'Model': 'RD525', 'Percussion Power': '25 kW', 'Percussion Rate': '93 Hz', 'Max Pressure': '235 bar', 'Rotation Speed': '0-280 RPM (OMS125)', 'Torque': '625 Nm', 'Weight': '225 kg' }, hydraulic: { 'Powerpack': 'HPP575 • 2×75 kW', 'Oil Tank': '270 L', 'Cooler': '2×30 kW', 'System': 'Dual pump load-sensing' }, carrier: { 'Engine': 'Cummins QSB4.5 • 119 kW', 'Carrier': 'C400 (Twin boom)', 'Tramming Speed': '12 km/h', 'Transmission': '4x4 Articulated' }, dimensions: { 'Transport Width': '2,500 mm', 'Transport Height': '3,200 mm', 'Transport Length': '12,500 mm', 'Total Weight': '22,000+ kg' } } },
-                { id: 'dd421', model: 'DD421', company: 'Sandvik', category: 'Development Drill', freq: 100, maxRPM: 320, bitDiameters: [43, 51, 64], specs: { overview: { 'Rock Drill': 'RD520', 'Boom': 'Universal B24', 'Coverage': '24 m', 'Application': 'Underground Development' }, rockdrill: { 'Model': 'RD520', 'Percussion Power': '20 kW', 'Percussion Rate': '67 Hz', 'Max Pressure': '220 bar', 'Rotation Speed': '0-280 RPM', 'Torque': '400 Nm', 'Weight': '180 kg' }, hydraulic: { 'Powerpack': 'HPP575 • 75 kW', 'Oil Tank': '250 L', 'Cooler': '30 kW', 'System': 'Load-sensing' }, carrier: { 'Engine': 'MB OM904LA • 110 kW', 'Carrier': 'NC7 Series', 'Tramming Speed': '14 km/h', 'Drive': '4-wheel drive frame-steered' }, dimensions: { 'Transport Width': '2,350 mm', 'Transport Height': '2,900 mm', 'Transport Length': '12,200 mm', 'Total Weight': '17,000-18,000 kg' } } },
-                { id: 'dd422i', model: 'DD422i', company: 'Sandvik', category: 'Advanced i-Class', freq: 93, maxRPM: 280, bitDiameters: [43, 51, 64], specs: { overview: { 'Rock Drill': 'RD525', 'Boom': 'SB60 / SB60i', 'Coverage': '60 m parallel', 'Automation': 'Fully Automated (SICA)' }, rockdrill: { 'Model': 'RD525', 'Percussion Power': '25 kW', 'Percussion Rate': '93 Hz', 'Max Pressure': '235 bar', 'Rotation Speed': '280 RPM (OMS125)', 'Torque': '625 Nm', 'Control System': 'Intelligent torque optimization' }, hydraulic: { 'Powerpack': 'HPP575 • 2×75 kW', 'Oil Tank': '270 L', 'Cooler': '2×30 kW (oil-to-water)', 'System': 'Advanced load-sensing' }, carrier: { 'Engine': 'Cummins QSB4.5 • 119 kW', 'Carrier': 'C400D', 'Tramming Speed': '12 km/h (limited with boom)', 'Transmission': '4x4 Articulated' }, dimensions: { 'Transport Width': '2,310 mm', 'Transport Height': '3,420 mm', 'Transport Length': '13,050 mm', 'Total Weight': '26,000 kg' } } },
-                { id: 'dd422ie', model: 'DD422iE', company: 'Sandvik', category: 'Electric i-Class', freq: 93, maxRPM: 280, bitDiameters: [43, 51, 64], specs: { overview: { 'Rock Drill': 'RD525', 'Drive': 'Electric Motor (Inverter)', 'Coverage': '60 m parallel', 'Emissions': 'ZERO Diesel (Battery)' }, rockdrill: { 'Model': 'RD525', 'Percussion Power': '25 kW', 'Percussion Rate': '93 Hz', 'Max Pressure': '235 bar', 'Rotation Speed': '280 RPM', 'Torque': '625 Nm', 'Control': 'SICA (Intelligent)' }, hydraulic: { 'System Pressure': '235 bar max', 'Pump': 'Variable displacement', 'Cooler': '2×30 kW', 'Tank': '270 L' }, carrier: { 'Drive Type': 'Electric Motor + Mechanical', 'Total Power': '205 kW', 'Battery': 'Sodium-Nickel-Chloride • 100 kWh', 'Voltage': '380-1000 V (50/60 Hz)' }, dimensions: { 'Transport Width': '2,400 mm', 'Transport Height': '3,450 mm', 'Transport Length': '13,100 mm', 'Total Weight': '27,500 kg' } } }
-            ],
-            bolters: [
-                { id: 'ds311', model: 'DS311', company: 'Sandvik', category: 'Compact Bolter', freq: 110, maxRPM: 530, bitDiameters: [33, 38, 43], specs: { overview: { 'Rock Drill': 'RD314', 'Category': 'Compact Single-Operator', 'Coverage': '6.35 x 2.1 m', 'Bolt Length': '1-3 m (5-10 ft)' }, rockdrill: { 'Model': 'RD314', 'Percussion Power': '14 kW', 'Percussion Rate': '110 Hz', 'Max Pressure': '180 bar', 'Rotation Speed': '0-530 RPM', 'Torque': '340 Nm', 'Weight': '122 kg' }, hydraulic: { 'Powerpack': 'HPP575 • 70 kW', 'Oil Tank': '200 L', 'Cooler': '25 kW', 'Pump': 'Variable displacement' }, carrier: { 'Engine': 'Deutz TCD2012 • 74 kW', 'Carrier': 'NC5-17', 'Tramming Speed': '12 km/h', 'Drive': '4-wheel drive' }, dimensions: { 'Transport Width': '2,020 mm', 'Transport Height': '2,920 mm', 'Transport Length': '11,530 mm', 'Total Weight': '15,000-18,000 kg' } } },
-                { id: 'ds312', model: 'DS312', company: 'Sandvik', category: 'Single-Operator Bolter', freq: 110, maxRPM: 530, bitDiameters: [33, 38, 43], specs: { overview: { 'Rock Drill': 'RD314 / RD315', 'Screen Handler': 'SB40SH (Optional)', 'Coverage': '6.35 x 2.1 m', 'Bolt Length': '1.5-3 m' }, rockdrill: { 'Model': 'RD314 / RD315', 'Percussion Power': '14-15 kW', 'Percussion Rate': '95-110 Hz', 'Max Pressure': '180 bar', 'Rotation Speed': '0-530 RPM', 'Torque': '340 Nm', 'Weight': '122 kg' }, hydraulic: { 'Powerpack': 'HPP575 • 70 kW', 'Oil Tank': '200 L', 'Cooler': '25 kW', 'System': 'Load-sensing proportional' }, carrier: { 'Engine': 'Deutz TCD2012 • 74 kW', 'Carrier': 'NC5-17', 'Tramming Speed': '12 km/h', 'Transmission': '4x4 Frame-steered' }, dimensions: { 'Transport Width': '2,020 mm', 'Transport Height': '2,920 mm', 'Transport Length': '12,450 mm', 'Total Weight': '16,000-18,000 kg' } } },
-                { id: 'ds411', model: 'DS411', company: 'Sandvik', category: 'Rock Support Bolter', freq: 110, maxRPM: 520, bitDiameters: [33, 38, 43], specs: { overview: { 'Rock Drill': 'RD314', 'Boom': 'TBR60 (Full Coverage)', 'Coverage': 'Full drift coverage', 'Bolt Length': '1.5-3 m (5-10 ft)' }, rockdrill: { 'Model': 'RD314', 'Percussion Power': '14 kW', 'Percussion Rate': '110 Hz', 'Max Pressure': '160 bar', 'Rotation Speed': '520 RPM (OMS100)', 'Torque': '340 Nm', 'Weight': '122 kg' }, hydraulic: { 'Powerpack': 'HPP1590 • 90 kW', 'Oil Tank': '270 L', 'Cooler': '45 kW', 'System': 'Load-sensing' }, carrier: { 'Engine': 'MB OM904LA • 110 kW (Tier 3)', 'Carrier': 'NC7N (Frame-steered)', 'Tramming Speed': '16 km/h', 'Drive': '4-wheel drive' }, dimensions: { 'Transport Width': '2,740 mm', 'Transport Height': '2,940 mm', 'Transport Length': '11,370 mm', 'Total Weight': '23,000 kg' } } },
-                { id: 'ds412ie', model: 'DS412iE', company: 'Sandvik', category: 'Electric i-Class Bolter', freq: 110, maxRPM: 520, bitDiameters: [33, 38, 43], specs: { overview: { 'Rock Drill': 'RD314', 'Drive': 'Electric Motor (Inverter)', 'Coverage': '4.5 x 4.5 m (optimum)', 'Automation': 'Up to 90% automatic' }, rockdrill: { 'Model': 'RD314', 'Percussion Power': '14 kW', 'Percussion Rate': '110 Hz', 'Max Pressure': '160 bar', 'Rotation Speed': '520 RPM (OMS100)', 'Torque': '340 Nm', 'Control': 'Fully Automated iSOLO' }, hydraulic: { 'System Pressure': '160 bar max', 'Pump': 'Variable displacement', 'Cooler': '2×30 kW', 'Tank': '270 L' }, carrier: { 'Drive Type': 'Electric Motor (Inverter)', 'Total Power': '205 kW', 'Battery': 'Sodium-Nickel-Chloride • 98.8 kWh', 'Voltage': '380-1000 V (50/60 Hz)' }, dimensions: { 'Transport Width': '2,500 mm', 'Transport Height': '3,200 mm', 'Transport Length': '13,100 mm', 'Total Weight': '30,000 kg' } } }
-            ]
-        };
-
-        let currentScreen = 'screen-home';
-        let currentDrill = null;
-        let currentCategory = null;
-
-        function goTo(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            currentScreen = screenId;
-            updateTabs();
-            window.scrollTo(0, 0);
+        // Helper function to convert degrees to radians
+        function degreesToRadians(degrees) {
+            return (degrees * Math.PI) / 180;
         }
 
-        function goBack() {
-            if (currentCategory === 'longhole') goTo('screen-drills-longhole');
-            else if (currentCategory === 'jumbos') goTo('screen-drills-jumbos');
-            else if (currentCategory === 'bolters') goTo('screen-drills-bolters');
-            else goTo('screen-drills');
-        }
-
-        function updateTabs() {
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            if (currentScreen.includes('home')) document.querySelectorAll('.tab-item')[0].classList.add('active');
-            else if (currentScreen.includes('calculator') || currentScreen.includes('drilling') || currentScreen.includes('deviation')) document.querySelectorAll('.tab-item')[1].classList.add('active');
-            else if (currentScreen.includes('drill')) document.querySelectorAll('.tab-item')[2].classList.add('active');
-            else if (currentScreen.includes('converter')) document.querySelectorAll('.tab-item')[3].classList.add('active');
-            else if (currentScreen.includes('settings')) document.querySelectorAll('.tab-item')[4].classList.add('active');
-        }
-
-        // DRILL DEVIATION CALCULATOR
-        function degreesToRadians(degrees) { return degrees * Math.PI / 180; }
-
+        // Calculate toe point given length, azimuth, and dip
         function calculateToePoint(length, azimuth, dip) {
             const azimuthRad = degreesToRadians(azimuth);
             const dipRad = degreesToRadians(dip);
+
+            // Horizontal distance
             const horizontalDistance = length * Math.cos(dipRad);
+            
+            // Coordinates
             const easting = horizontalDistance * Math.sin(azimuthRad);
             const northing = horizontalDistance * Math.cos(azimuthRad);
             const elevation = -length * Math.sin(dipRad);
+
             return { easting, northing, elevation };
         }
 
+        // Main calculation function
         function calculateDeviation() {
+            // Get Hole 1 inputs
             const len1 = parseFloat(document.getElementById('dev-length1').value) || 0;
             const azm1 = parseFloat(document.getElementById('dev-azimuth1').value) || 0;
             const dip1 = parseFloat(document.getElementById('dev-dip1').value) || 0;
+
+            // Get Hole 2 inputs
             const len2 = parseFloat(document.getElementById('dev-length2').value) || 0;
             const azm2 = parseFloat(document.getElementById('dev-azimuth2').value) || 0;
             const dip2 = parseFloat(document.getElementById('dev-dip2').value) || 0;
 
+            // Calculate toe points
             const toe1 = calculateToePoint(len1, azm1, dip1);
             const toe2 = calculateToePoint(len2, azm2, dip2);
 
+            // Calculate differences
             const deltaE = toe2.easting - toe1.easting;
             const deltaN = toe2.northing - toe1.northing;
             const deltaZ = toe2.elevation - toe1.elevation;
+
+            // Calculate separations
             const horizSep = Math.sqrt(deltaE * deltaE + deltaN * deltaN);
             const dist3D = Math.sqrt(deltaE * deltaE + deltaN * deltaN + deltaZ * deltaZ);
             const totalDiff = Math.abs(deltaE) + Math.abs(deltaN) + Math.abs(deltaZ);
 
+            // Update Hole 1 toe point display
             document.getElementById('dev-toe1-e').textContent = toe1.easting.toFixed(4);
             document.getElementById('dev-toe1-n').textContent = toe1.northing.toFixed(4);
             document.getElementById('dev-toe1-z').textContent = toe1.elevation.toFixed(4);
+
+            // Update Hole 2 toe point display
             document.getElementById('dev-toe2-e').textContent = toe2.easting.toFixed(4);
             document.getElementById('dev-toe2-n').textContent = toe2.northing.toFixed(4);
             document.getElementById('dev-toe2-z').textContent = toe2.elevation.toFixed(4);
-            document.getElementById('dev-delta-e').textContent = deltaE.toFixed(4) + ' m';
-            document.getElementById('dev-delta-n').textContent = deltaN.toFixed(4) + ' m';
-            document.getElementById('dev-delta-z').textContent = deltaZ.toFixed(4) + ' m';
-            document.getElementById('dev-horiz-sep').textContent = horizSep.toFixed(4) + ' m';
-            document.getElementById('dev-3d-distance').textContent = dist3D.toFixed(4) + ' m';
-            document.getElementById('dev-total-diff').textContent = totalDiff.toFixed(4) + ' m';
 
+            // Update differences display
+            document.getElementById('dev-delta-e').innerHTML = deltaE.toFixed(4) + ' <span>m</span>';
+            document.getElementById('dev-delta-n').innerHTML = deltaN.toFixed(4) + ' <span>m</span>';
+            document.getElementById('dev-delta-z').innerHTML = deltaZ.toFixed(4) + ' <span>m</span>';
+            document.getElementById('dev-horiz-sep').innerHTML = horizSep.toFixed(4) + ' <span>m</span>';
+            document.getElementById('dev-3d-distance').innerHTML = dist3D.toFixed(4) + ' <span>m</span>';
+            document.getElementById('dev-total-diff').innerHTML = totalDiff.toFixed(4) + ' <span>m</span>';
+
+            // Show results section
             document.getElementById('dev-results').classList.add('show');
+
+            // Scroll to results
+            document.getElementById('dev-results').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Initialize Drill Selector
-        function initDrillSelector() {
-            const selector = document.getElementById('drill-selector');
-            selector.innerHTML = '';
-            Object.values(drillData).flat().forEach(drill => {
-                const btn = document.createElement('button');
-                btn.className = 'drill-option';
-                btn.innerHTML = `<div class="drill-option-name">${drill.model}</div><div class="drill-option-freq">${drill.freq} Hz</div>`;
-                btn.onclick = () => selectDrill(drill);
-                selector.appendChild(btn);
-            });
-        }
-
-        let selectedDrill = null;
-
-        function selectDrill(drill) {
-            selectedDrill = drill;
-            document.querySelectorAll('.drill-option').forEach(o => o.classList.remove('selected'));
-            event.target.closest('.drill-option').classList.add('selected');
-            updateDrillParams();
-            document.getElementById('drill-params').style.display = 'block';
-        }
-
-        function updateDrillParams() {
-            if (!selectedDrill) return;
-            const select = document.getElementById('bit-diameter');
-            select.innerHTML = selectedDrill.bitDiameters.map(d => `<option value="${d}">${d} mm</option>`).join('');
-        }
-
-        function updateDrillCalc() { }
-
-        function calculateRPM() {
-            if (!selectedDrill) { alert('Please select a drill'); return; }
-            const bitDia = parseFloat(document.getElementById('bit-diameter').value);
-            const rockType = document.getElementById('rock-type').value;
-            const indexing = { soft: 5, medium: 8, hard: 10 }[rockType];
-            const rpm = Math.round((60 * selectedDrill.freq * indexing) / (Math.PI * bitDia));
-            const circumference = (Math.PI * bitDia).toFixed(2);
-            const spacing = (circumference / selectedDrill.freq).toFixed(2);
-
-            document.getElementById('rpm-model').textContent = selectedDrill.model;
-            document.getElementById('rpm-freq').textContent = selectedDrill.freq + ' Hz';
-            document.getElementById('rpm-value').textContent = Math.min(rpm, selectedDrill.maxRPM) + ' RPM';
-            document.getElementById('rpm-circumference').textContent = circumference + ' mm';
-            document.getElementById('rpm-spacing').textContent = spacing + ' mm';
-            document.getElementById('rpm-results').classList.add('show');
-        }
-
-        function calculateGroundSupport() {
-            const w = parseFloat(document.getElementById('gs-width').value);
-            const h = parseFloat(document.getElementById('gs-height').value);
-            const d = parseFloat(document.getElementById('gs-depth').value);
-            const sw = parseFloat(document.getElementById('gs-spacing-w').value);
-            const sd = parseFloat(document.getElementById('gs-spacing-d').value);
-            const screenW = parseFloat(document.getElementById('gs-screen-w').value);
-            const screenL = parseFloat(document.getElementById('gs-screen-l').value);
-
-            const screenArea = (screenW - 0.3) * (screenL - 0.3);
-            const totalArea = w * d + 2 * (h - 1.5) * d;
-            const screens = Math.ceil(totalArea / screenArea);
-            const bolts = Math.ceil((w / sw) * (d / sd));
-
-            document.getElementById('gs-screens').textContent = screens;
-            document.getElementById('gs-bolts').textContent = Math.ceil(bolts);
-            document.getElementById('gs-plates').textContent = Math.ceil(bolts);
-            document.getElementById('gs-results').classList.add('show');
-        }
-
-        function calculateMucking() {
-            const vol = parseFloat(document.getElementById('muck-w').value) * parseFloat(document.getElementById('muck-h').value) * parseFloat(document.getElementById('muck-d').value);
-            const bucket = parseFloat(document.getElementById('muck-bucket').value);
-            const buckets = Math.ceil((vol * 1.308) / bucket);
-            document.getElementById('muck-volume').textContent = vol.toFixed(2) + ' m³';
-            document.getElementById('muck-buckets').textContent = buckets;
-            document.getElementById('muck-results').classList.add('show');
-        }
-
-        function calculateShotcrete() {
-            const w = parseFloat(document.getElementById('shot-w').value);
-            const h = parseFloat(document.getElementById('shot-h').value);
-            const d = parseFloat(document.getElementById('shot-d').value);
-            const backThick = parseFloat(document.getElementById('shot-back').value) / 100;
-            const wallThick = parseFloat(document.getElementById('shot-wall').value) / 100;
-            const backVol = (w * d * backThick).toFixed(3);
-            const wallVol = (2 * h * d * wallThick).toFixed(3);
-            const total = (parseFloat(backVol) + parseFloat(wallVol)).toFixed(3);
-            document.getElementById('shot-back-vol').textContent = backVol + ' m³';
-            document.getElementById('shot-wall-vol').textContent = wallVol + ' m³';
-            document.getElementById('shot-total-vol').textContent = total + ' m³';
-            document.getElementById('shot-results').classList.add('show');
-        }
-
-        function populateDrills() {
-            ['longhole', 'jumbos', 'bolters'].forEach(cat => {
-                const container = document.getElementById(`drills-${cat}`);
-                container.innerHTML = drillData[cat].map(drill => 
-                    `<div class="drill-card" onclick="showDrill('${drill.id}', '${cat}')">
-                        <div class="drill-card-name">${drill.model}</div>
-                        <div class="drill-card-type">${drill.company}<br>${drill.category}</div>
-                    </div>`
-                ).join('');
-            });
-        }
-
-        function showDrill(id, cat) {
-            currentDrill = drillData[cat].find(d => d.id === id);
-            currentCategory = cat;
-            document.getElementById('detail-title').textContent = currentDrill.model + ' - ' + currentDrill.company;
-            switchTab('overview');
-            goTo('screen-drill-detail');
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.spec-tab').forEach(t => t.classList.remove('active'));
-            if (event?.target) event.target.classList.add('active');
-            
-            const specs = currentDrill.specs[tab] || {};
-            const html = Object.entries(specs).map(([k, v]) => 
-                `<div class="spec-item"><div class="spec-label">${k}</div><div class="spec-value">${v}</div></div>`
-            ).join('');
-            document.getElementById('detail-content').innerHTML = `<div class="spec-grid">${html}</div>`;
-        }
-
-        function convertUnits() {
-            const input = parseFloat(document.getElementById('conv-input').value) || 0;
-            const from = document.getElementById('conv-from').value;
-            const to = document.getElementById('conv-to').value;
-            const factors = { m: 1, ft: 0.3048, mm: 0.001, cm: 0.01, in: 0.0254, yd: 0.9144 };
-            const result = (input * factors[from] / factors[to]).toFixed(4);
-            document.getElementById('conv-output').textContent = result;
-        }
-
-        function convertVolume() {
-            const input = parseFloat(document.getElementById('vol-input').value) || 0;
-            const from = document.getElementById('vol-from').value;
-            const to = document.getElementById('vol-to').value;
-            const factors = { m3: 1, yd3: 0.764555, l: 0.001 };
-            const result = (input * factors[from] / factors[to]).toFixed(4);
-            document.getElementById('vol-output').textContent = result;
-        }
-
-        function saveSettings() { }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            initDrillSelector();
-            populateDrills();
-        });
+        // Run calculation on page load with default values
+        window.addEventListener('load', calculateDeviation);
     </script>
 </body>
 </html>

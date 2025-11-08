@@ -46,13 +46,25 @@
                 <div class="form-group">
                     <label>Drill Model</label>
                     <select id="drill">
-                        <option value="DD210">DD210</option>
-                        <option value="DD322i">DD322i</option>
-                        <option value="DD421">DD421</option>
-                        <option value="DD422i">DD422i</option>
-                        <option value="DL421">DL421</option>
-                        <option value="DL422i">DL422i</option>
-                        <option value="DL432i">DL432i</option>
+                        <optgroup label="Jumbos (DD Series)">
+                            <option value="DD210">DD210</option>
+                            <option value="DD322i">DD322i</option>
+                            <option value="DD421">DD421</option>
+                            <option value="DD422">DD422</option>
+                            <option value="DD422i">DD422i</option>
+                        </optgroup>
+                        <optgroup label="Long Hole (DL Series)">
+                            <option value="DL421">DL421</option>
+                            <option value="DL422i">DL422i</option>
+                            <option value="DL432i">DL432i</option>
+                        </optgroup>
+                        <optgroup label="Bolters (DS Series)">
+                            <option value="DS422">DS422</option>
+                            <option value="DS511">DS511</option>
+                            <option value="DS512">DS512</option>
+                            <option value="DS514">DS514</option>
+                            <option value="DS514i">DS514i</option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -82,9 +94,35 @@
                     </div>
                 </div>
 
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="form-group">
+                        <label>Avg Rotation Pressure (bar)</label>
+                        <input type="number" id="avgRotationPressure" placeholder="50" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Avg Penetration Rate (m/min)</label>
+                        <input type="number" id="avgPenetrationRate" placeholder="2.5" step="0.1">
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label>Location</label>
-                    <input type="text" id="location" placeholder="e.g., Level 500 Main Drift">
+                    <label>Location (Province)</label>
+                    <select id="location">
+                        <option value="">Select Province</option>
+                        <option value="Alberta">Alberta</option>
+                        <option value="British Columbia">British Columbia</option>
+                        <option value="Manitoba">Manitoba</option>
+                        <option value="New Brunswick">New Brunswick</option>
+                        <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                        <option value="Northwest Territories">Northwest Territories</option>
+                        <option value="Nova Scotia">Nova Scotia</option>
+                        <option value="Nunavut">Nunavut</option>
+                        <option value="Ontario">Ontario</option>
+                        <option value="Prince Edward Island">Prince Edward Island</option>
+                        <option value="Quebec">Quebec</option>
+                        <option value="Saskatchewan">Saskatchewan</option>
+                        <option value="Yukon">Yukon</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -112,6 +150,8 @@
                 rpm: document.getElementById('rpm').value,
                 pressure: document.getElementById('pressure').value,
                 rock: document.getElementById('rock').value,
+                avgRotationPressure: document.getElementById('avgRotationPressure').value,
+                avgPenetrationRate: document.getElementById('avgPenetrationRate').value,
                 location: document.getElementById('location').value,
                 notes: document.getElementById('notes').value,
                 date: new Date().toLocaleDateString()
@@ -124,6 +164,8 @@
             document.getElementById('bit').value = '';
             document.getElementById('rpm').value = '';
             document.getElementById('pressure').value = '';
+            document.getElementById('avgRotationPressure').value = '';
+            document.getElementById('avgPenetrationRate').value = '';
             document.getElementById('location').value = '';
             document.getElementById('notes').value = '';
         }
@@ -156,6 +198,16 @@
                         <div class="entry-detail">
                             <div class="entry-detail-label">Rock</div>
                             <div class="entry-detail-value">${e.rock}</div>
+                        </div>
+                    </div>
+                    <div class="entry-details">
+                        <div class="entry-detail">
+                            <div class="entry-detail-label">Avg Rotation Pressure</div>
+                            <div class="entry-detail-value">${e.avgRotationPressure}bar</div>
+                        </div>
+                        <div class="entry-detail">
+                            <div class="entry-detail-label">Avg Penetration Rate</div>
+                            <div class="entry-detail-value">${e.avgPenetrationRate}m/min</div>
                         </div>
                     </div>
                     ${e.location ? `<p style="font-size: 11px;"><strong>Location:</strong> ${e.location}</p>` : ''}

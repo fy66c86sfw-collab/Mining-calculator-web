@@ -1,5 +1,5 @@
 
-upload.js
+upload-fixed.js
 import { put } from '@vercel/blob';
 
 export default async function handler(req, res) {
@@ -14,8 +14,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'filename and fileContent required' });
     }
 
+    // Ensure fileContent is a string
+    const contentString = typeof fileContent === 'string' 
+      ? fileContent 
+      : JSON.stringify(fileContent);
+
     // Upload to Vercel Blob
-    const blob = await put(filename, fileContent, {
+    const blob = await put(filename, contentString, {
       access: 'public',
       addRandomSuffix: true,
     });
@@ -27,6 +32,9 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('Upload error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
   }
 }

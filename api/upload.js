@@ -1,7 +1,5 @@
 
-upload-fixed.js
-import { put } from '@vercel/blob';
-
+upload-test.js
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -11,30 +9,21 @@ export default async function handler(req, res) {
     const { filename, fileContent } = req.body;
 
     if (!filename || !fileContent) {
-      return res.status(400).json({ error: 'filename and fileContent required' });
+      return res.status(400).json({ error: 'Missing filename or fileContent' });
     }
 
-    // Ensure fileContent is a string
-    const contentString = typeof fileContent === 'string' 
-      ? fileContent 
-      : JSON.stringify(fileContent);
-
-    // Upload to Vercel Blob
-    const blob = await put(filename, contentString, {
-      access: 'public',
-      addRandomSuffix: true,
-    });
-
+    // For now, just return success - we'll validate the data arrives
     return res.status(200).json({
       success: true,
-      url: blob.url,
-      filename: blob.pathname,
+      message: 'Entry received',
+      filename: filename,
     });
+
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('Handler error:', error);
     return res.status(500).json({ 
-      error: error.message,
-      details: error.toString()
+      error: 'Server error',
+      message: error.message
     });
   }
 }

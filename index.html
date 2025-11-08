@@ -57,54 +57,10 @@
     <div class="menu-card" onclick="window.location.href='videos.html'"><div class="menu-icon">▶️</div><span>Training Videos</span></div>
     <div class="menu-card" onclick="window.location.href='settings.html'"><div class="menu-icon">⚙️</div><span>Settings</span></div>
 
-        <!-- File Upload Section -->
-        <div class="card" style="margin-top: 20px;">
-                  <h2>Upload Drill Log Files</h2>
-                  <form id="uploadForm">
-                              <input type="file" id="fileInput" accept=".csv,.xlsx,.txt" required>
-                              <button type="submit">Upload</button>
-                            </form>
-                  <div id="uploadResult"></div>
-                </div>
 </div>
     </div>
 </div>
 <script>
-
-      // File upload handling
-      document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-              e.preventDefault();
-
-              const fileInput = document.getElementById('fileInput');
-              const resultDiv = document.getElementById('uploadResult');
-              const file = fileInput.files[0];
-
-              if (!file) {
-                        resultDiv.textContent = 'Please select a file';
-                        return;
-                      }
-
-              resultDiv.textContent = 'Uploading...';
-
-              try {
-                        const response = await fetch('/api/upload', {
-                                    method: 'POST',
-                                    body: file
-                                              });
-
-                        const data = await response.json();
-
-                        if (response.ok) {
-                                    resultDiv.innerHTML = `<p style="color: green;">File uploaded successfully!</p><p>URL: <a href="${data.url}" target="_blank">${data.url}</a></p>`;
-                                    fileInput.value = '';
-                                  } else {
-                                    resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error || 'Upload failed'}</p>`;
-                                  }
-                      } catch (error) {
-                        resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-                      }
-            });
-
 </script>
 </body>
 </html>

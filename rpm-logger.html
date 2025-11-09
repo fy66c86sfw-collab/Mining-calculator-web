@@ -148,6 +148,62 @@
 
     <script>
         const KEY = 'drilling_log';
+                const UPLOAD_QUEUE_KEY = 'upload_queue';
+
+                // Queue upload for retry if offline
+        function queueUpload(entry) {
+          try {
+            let queue = JSON.parse(localStorage.getItem(UPLOAD_QUEUE_KEY)) || [];
+            queue.push({ entry: entry, timestamp: Date.now() });
+            localStorage.setItem(UPLOAD_QUEUE_KEY, JSON.stringify(queue));
+          } catch (e) {
+            console.error('Failed to queue upload:', e);
+          }
+        }
+
+        // Upload to server
+        async function uploadToServer(entry) {
+          const filename = `drill-log-${entry.id}.json`;
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: filename,
+              fileContent: JSON.stringify(entry, null, 2)
+            })
+          });
+          if (!response.ok) throw new Error('Upload failed');
+          return response;
+        }
+
+        // Try to upload with offline queue fallback
+        function tryUpload(entry) {
+          if (!navigator.onLine) {
+            queueUpload(entry);
+            return;
+          }
+          uploadToServer(entry).catch(() => queueUpload(entry));
+        }
+
+        // Process queued uploads when online
+        async function processUploadQueue() {
+          if (!navigator.onLine) return;
+          try {
+            let queue = JSON.parse(localStorage.getItem(UPLOAD_QUEUE_KEY)) || [];
+            if (queue.length === 0) return;
+            const failedUploads = [];
+            for (const item of queue) {
+              try {
+                await uploadToServer(item.entry);
+              } catch (e) {
+                failedUploads.push(item);
+              }
+            }
+            localStorage.setItem(UPLOAD_QUEUE_KEY, JSON.stringify(failedUploads));
+          } catch (e) {
+            console.error('Queue processing error:', e);
+          }
+        }
         
         function saveDrillEntry() {
             const entry = {
@@ -176,23 +232,8 @@
                 entries.unshift(entry);
                 localStorage.setItem(KEY, JSON.stringify(entries));
 
-                        // Silently upload to server (no user notification if it fails)
-        try {
-          const filename = `drill-log-${entry.id}.json`;
-          fetch('/api/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              filename: filename,
-              fileContent: JSON.stringify(entry, null, 2)
-            })
-          }).catch(() => {
-            // Silently fail - entry is already saved locally
-          });
-        } catch (e) {
-          // Silently fail - entry is already saved locally
-        }
-                
+                                // Try to upload (queues if offline)
+        tryUpload(entry);
                 // Clear form
                 document.getElementById('drill').value = 'DD322';
                 document.getElementById('bit').value = '';
@@ -321,6 +362,16 @@
         
         // Load entries on page load
         displayEntries();
+        // Process upload queue when page loads
+        window.addEventListener('load', processUploadQueue);
+
+        // Process upload queue when coming back online
+        window.addEventListener('online', processUploadQueue);
+
+        // Process queue every hour if online
+        setInterval(() => {
+          if (navigator.onLine) processUploadQueue();
+        }, 60 * 60 * 1000); // 1 hour
     </script>
 </body>
 </html>

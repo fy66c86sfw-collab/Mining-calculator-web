@@ -1,3 +1,5 @@
+import { put } from '@vercel/blob';
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -23,20 +25,27 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing filename or fileContent' });
     }
 
-    // Just return success for now - no blob storage
+    // Upload to Vercel Blob
+    const blob = await put(`drill-logs/${filename}`, fileContent, {
+      access: 'public',
+      contentType: 'application/json'
+    });
+
+    console.log('Successfully uploaded to blob:', blob.url);
+
     return res.status(200).json({
       success: true,
-      message: 'Entry received and saved',
+      message: 'Entry uploaded to server',
       filename: filename,
+      url: blob.url,
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('Handler error:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Server error',
-      message: error.message,
-      stack: error.stack
+      message: error.message
     });
   }
 }

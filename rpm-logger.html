@@ -175,6 +175,23 @@
                 let entries = JSON.parse(localStorage.getItem(KEY)) || [];
                 entries.unshift(entry);
                 localStorage.setItem(KEY, JSON.stringify(entries));
+
+                        // Silently upload to server (no user notification if it fails)
+        try {
+          const filename = `drill-log-${entry.id}.json`;
+          fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: filename,
+              fileContent: JSON.stringify(entry, null, 2)
+            })
+          }).catch(() => {
+            // Silently fail - entry is already saved locally
+          });
+        } catch (e) {
+          // Silently fail - entry is already saved locally
+        }
                 
                 // Clear form
                 document.getElementById('drill').value = 'DD322';

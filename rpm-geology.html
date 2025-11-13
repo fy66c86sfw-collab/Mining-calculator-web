@@ -54,6 +54,16 @@
             opacity: 0.95;
         }
 
+              .back-btn {
+                          background: none;
+                          border: none;
+                          color: var(--secondary);
+                          cursor: pointer;
+                          font-size: 18px;
+                          font-weight: 700;
+                          margin-bottom: 15px;
+                        }
+
         .content {
             padding: 16px;
             padding-bottom: 30px;
@@ -259,6 +269,7 @@
         </div>
 
         <div class="content">
+                  <button class="back-btn" onclick="window.history.back();">← Back</button>
             <div class="filter-section">
                 <input type="text" id="searchInput" placeholder="Search province, commodity, or rock type...">
             </div>

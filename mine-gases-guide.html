@@ -11,17 +11,25 @@
       box-sizing: border-box;
     }
 
+            :root {
+                          --primary: #2c3e50;
+                          --secondary: #3498db;
+                          --success: #27ae60;
+                          --warning: #f39c12;
+                          --light: #ecf0f1;
+                          --border: #bdc3c7;
+                      }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #333;
+            background: var(--light);t
+                  color: var(--primary);
       line-height: 1.6;
       padding-bottom: 2rem;
     }
 
     .header {
-      background: linear-gradient(135deg, #0F3057 0%, #1a4d7a 100%);
-      color: white;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
       padding: 2rem 1rem;
       text-align: center;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -333,9 +341,8 @@
       opacity: 0.8;
     }
 
-            .back-btn {
-                          background: none;
-                          border: none;
+            ..back-button {
+                    background: var(--primary); none;
                           color: #3498db;
                           cursor: pointer;
                           font-size: 18px;
@@ -351,8 +358,7 @@
     <p>Comprehensive gas hazard information for rescue operations</p>
   </div>
 
-                <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
-
+            <button class="back-button" onclick="goBack()">⬅ Back</button>
   <div class="container">
     <!-- Introduction -->
     <div class="intro-section">
@@ -970,6 +976,10 @@
         gasPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
+
+        function goBack() {
+                  window.location.href = 'index.html';
+              }
   </script>
 </body>
 </html>

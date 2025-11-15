@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mining Toolkit - Home</title>
         <script src="settings.js"></script>
+        <script src="translations.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -64,5 +65,22 @@
 </div>
 <script>
 </script>
+    <script>
+        // Load language on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            updateLanguage();
+        });
+
+        // Update language text on index page
+        function updateLanguage() {
+            // Update header if element exists
+            const header = document.querySelector('.header h1');
+            if (header) header.textContent = t('appTitle');
+            
+            // Update back button if it exists
+            const backBtn = document.querySelector('.back-btn');
+            if (backBtn) backBtn.innerHTML = t('back');
+        }
+    </script>
 </body>
 </html>

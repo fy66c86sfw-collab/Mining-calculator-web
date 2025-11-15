@@ -67,7 +67,10 @@
 </script>
     <script>
         // Load language on page load
-        window.addEventListener('DOMContentLoaded', function() {
+        // Load settings and apply theme on page load
+        window.addEventListener('DOMContentLoaded', async function() {
+            await loadSettings();
+            applySettings();
             updateLanguage();
         });
 

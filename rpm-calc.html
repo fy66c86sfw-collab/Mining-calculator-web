@@ -70,9 +70,75 @@
             background: #e8f4f8; border-left: 4px solid var(--secondary); padding: 10px;
             border-radius: 4px; margin-top: 12px; font-size: 12px; color: var(--primary); line-height: 1.5;
         }
+        .warning-box {
+            background: #fff3cd; border-left: 4px solid var(--warning); padding: 10px;
+            border-radius: 4px; margin-top: 12px; font-size: 12px; color: var(--primary); line-height: 1.5;
+        }
+        .danger-box {
+            background: #f8d7da; border-left: 4px solid var(--danger); padding: 10px;
+            border-radius: 4px; margin-top: 8px; font-size: 12px; color: var(--primary); line-height: 1.5;
+        }
         .hidden { display: none !important; }
         .results-section { display: none; margin-top: 12px; }
         .results-section.show { display: block; }
+        .percussion-box {
+            background: #f0f7ff; border-left: 4px solid #3498db; padding: 12px;
+            border-radius: 4px; margin-top: 12px; font-size: 13px; color: var(--primary); line-height: 1.6;
+        }
+        .percussion-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .percussion-label {
+            font-weight: 600;
+            color: #3498db;
+            margin-top: 6px;
+        }
+        .bolting-warning {
+            background: #fff3cd; border-left: 4px solid #f39c12; padding: 12px;
+            border-radius: 4px; margin-top: 12px; font-size: 12px; color: var(--primary); line-height: 1.6;
+            display: none;
+        }
+        .bolting-warning.show {
+            display: block;
+        }
+    
+        .card-step-banner {
+            text-align: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: #888;
+            background: #e8f4f8;
+            padding: 6px 0 5px;
+            margin-bottom: 7px;
+            border-radius: 4px;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+        }
+        .card-step-banner.complete {
+            color: #27ae60 !important;
+            background: #deffe5 !important;
+        }
+        .card-step-banner.complete .step-check {
+            margin-left: 4px;
+            color: #27ae60;
+            font-size: 16px;
+        }
+    
+        .bit-type-tabs {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+        }
+        .tab-btn {
+            padding: 10px; border: 2px solid var(--border); border-radius: 6px;
+            background: white; cursor: pointer; font-size: 13px; font-weight: 600;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { border-color: var(--secondary); }
+        .tab-btn.active { border-color: var(--secondary); background: var(--secondary); color: white; }
         @media (max-width: 640px) {
             .bit-grid, .detail-grid { grid-template-columns: 1fr; }
             .result-rpm { font-size: 40px; }
@@ -86,7 +152,8 @@
             <button class="back-btn" onclick="window.location.href='rpm.html'">← Back</button>
 
             <div class="card">
-                <h2>Drill Selection</h2>
+                <div class="card-step-banner step-1" id="step-1">Step 1</div>
+<h2>Drill Selection</h2>
                 <div class="form-group">
                     <label for="drill">Drill Model</label>
                     <select id="drill" onchange="onDrillChange()">
@@ -113,13 +180,20 @@
                 </div>
             </div>
 
+            <div class="card hidden" id="bitTypeCard">
+                <div class="card-step-banner step-2" id="step-2">Step 2</div>
+<h2>Bit Type & Size</h2>
+                <div class="bit-type-tabs" id="bitTypeTabs"></div>
+            </div>
+
             <div class="card hidden" id="bitCard">
                 <h2>Bit Diameter</h2>
                 <div id="bitContainer"></div>
             </div>
 
             <div class="card hidden" id="rockCard">
-                <h2>Rock Hardness</h2>
+                <div class="card-step-banner step-3" id="step-3">Step 3</div>
+<h2>Rock Hardness</h2>
                 <div id="rockContainer"></div>
             </div>
 
@@ -127,7 +201,7 @@
                 <div class="result-box">
                     <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 8px;">Recommended RPM</div>
                     <div class="result-rpm" id="resultRpm">--</div>
-                    <div style="font-size: 11px; opacity: 0.85;"><span id="resultDrill">--</span> | <span id="resultBit">--</span>mm</div>
+                    <div style="font-size: 11px; opacity: 0.85;"><span id="resultDrill">--</span> | <span id="resultBit">--</span>mm | <span id="resultBitType">--</span></div>
                 </div>
 
                 <div class="card">
@@ -153,6 +227,8 @@
                 </div>
 
                 <div id="warningBox"></div>
+                <div id="percussionBox" class="percussion-box"></div>
+                <div id="boltingWarningBox" class="bolting-warning"></div>
                 <div id="tipsBox"></div>
             </div>
         </div>
@@ -160,43 +236,73 @@
 
     <script>
         const drills = {
-            dd210: { name: 'DD210 II', rock: 'RDX5', freq: '67 Hz', power: '20 kW', bits: [33,35,38,43,45,48], msg: '60 bar rotation' },
-            dd322i: { name: 'DD322i', rock: 'RD520', freq: '74 Hz', power: '20 kW', bits: [33,35,38,43,45,48], msg: '60 bar rotation' },
-            dd421: { name: 'DD421', rock: 'RD525', freq: '93 Hz', power: '25 kW', bits: [33,35,38,43,45,48], msg: '60 bar rotation' },
-            dd422i: { name: 'DD422i', rock: 'RD525', freq: '93 Hz', power: '25 kW', bits: [33,35,38,43,45,48], msg: '60 bar rotation', cap: 300 },
-            dl421: { name: 'DL421', rock: 'HL1560ST', freq: '30 Hz', power: '33 kW', bits: [64,89,102], msg: '50 bar rotation' },
-            dl422i: { name: 'DL422i', rock: 'HL1560ST', freq: '40 Hz', power: '33 kW', bits: [89,102,127], msg: '50 bar rotation' },
-            dl432i: { name: 'DL432i', rock: 'HL1760ST', freq: '30 Hz', power: '37 kW', bits: [64,89,102], msg: '50 bar rotation' },
-            ds311: { name: 'DS311', rock: 'RD314', freq: '110 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: '50 bar rotation' },
-            ds312: { name: 'DS312', rock: 'RD315', freq: '110 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: '50 bar rotation' },
-            ds411: { name: 'DS411', rock: 'RD315', freq: '110 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: '50 bar rotation' },
-            ds412i: { name: 'DS412i', rock: 'RD314', freq: '110 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: '50 bar rotation' },
-            ds422i: { name: 'DS422i', rock: 'RD414', freq: '78 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: '50 bar rotation' }
+            dd210: { name: 'DD210 II', rock: 'RDX5', freq: '67 Hz', power: '20 kW', bits: [33,35,38,43,45,48], reamers: [76,102,127], msg: 'recommended to stay under 60 bar rotation', type: 'DD', maxBar: 220, percussion: { soft: '180-200 bar', medium: '200-220 bar', hard: '220 bar (max)' } },
+            dd322i: { name: 'DD322i', rock: 'RD520', freq: '74 Hz', power: '20 kW', bits: [33,35,38,43,45,48], reamers: [76,102,127], msg: 'recommended to stay under 60 bar rotation', type: 'DD', maxBar: 220, percussion: { soft: '180-200 bar', medium: '200-220 bar', hard: '220 bar (max)' } },
+            dd421: { name: 'DD421', rock: 'RD525', freq: '93 Hz', power: '25 kW', bits: [33,35,38,43,45,48], reamers: [76,102,127], msg: 'recommended to stay under 60 bar rotation', type: 'DD', maxBar: 235, percussion: { soft: '180-200 bar', medium: '210-220 bar', hard: '220-235 bar (max)' } },
+            dd422i: { name: 'DD422i', rock: 'RD525', freq: '93 Hz', power: '25 kW', bits: [33,35,38,43,45,48], reamers: [76,102,127], msg: 'recommended to stay under 60 bar rotation', cap: 300, type: 'DD', maxBar: 235, percussion: { soft: '180-200 bar', medium: '210-220 bar', hard: '220-235 bar (max)' } },
+            dl421: { name: 'DL421', rock: 'HL1560ST', freq: '30 Hz', power: '33 kW', bits: [64,89,102], reamers: [102,127,152,203], msg: 'recommended to stay under 50 bar rotation for easy rod breaking', type: 'DL', maxBar: 190, percussion: { soft: '140-160 bar', medium: '165-180 bar', hard: '180-190 bar (max)' } },
+            dl422i: { name: 'DL422i', rock: 'HL1560ST', freq: '40 Hz', power: '33 kW', bits: [89,102,127], reamers: [127,152,203], msg: 'recommended to stay under 50 bar rotation for easy rod breaking', type: 'DL', maxBar: 190, percussion: { soft: '140-160 bar', medium: '165-180 bar', hard: '180-190 bar (max)' } },
+            dl432i: { name: 'DL432i', rock: 'HL1760ST', freq: '30 Hz', power: '37 kW', bits: [64,89,102], reamers: [102,127,152,203], msg: 'recommended to stay under 50 bar rotation for easy rod breaking', type: 'DL', maxBar: 190, percussion: { soft: '140-160 bar', medium: '165-180 bar', hard: '180-190 bar (max)' } },
+            ds311: { name: 'DS311', rock: 'RD314', freq: '110 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: 'recommended to stay under 60 bar rotation', type: 'DS', maxBar: 140, percussion: { soft: '100-120 bar', medium: '125-140 bar', hard: '140 bar (max)' } },
+            ds312: { name: 'DS312', rock: 'RD315', freq: '110 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: 'recommended to stay under 60 bar rotation', type: 'DS', maxBar: 140, percussion: { soft: '100-120 bar', medium: '125-140 bar', hard: '140 bar (max)' } },
+            ds411: { name: 'DS411', rock: 'RD315', freq: '110 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: 'recommended to stay under 60 bar rotation', type: 'DS', maxBar: 140, percussion: { soft: '100-120 bar', medium: '125-140 bar', hard: '140 bar (max)' } },
+            ds412i: { name: 'DS412i', rock: 'RD314', freq: '110 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: 'recommended to stay under 60 bar rotation', type: 'DS', maxBar: 140, percussion: { soft: '100-120 bar', medium: '125-140 bar', hard: '140 bar (max)' } },
+            ds422i: { name: 'DS422i', rock: 'RD414', freq: '78 Hz', power: '14 kW', bits: [33,35,38,43,45,48], msg: 'recommended to stay under 60 bar rotation', type: 'DS', maxBar: 140, percussion: { soft: '100-120 bar', medium: '125-140 bar', hard: '140 bar (max)' } }
         };
 
-        let state = { drill: null, bit: null };
+        let state = { drill: null, bit: null, bitType: 'standard' };
 
         function onDrillChange() {
             const id = document.getElementById('drill').value;
             state.drill = id ? drills[id] : null;
             state.bit = null;
+            state.bitType = 'standard';
             updateUI();
         }
 
         function updateUI() {
             const has = !!state.drill;
+            const hasReamers = has && state.drill.reamers && state.drill.reamers.length > 0;
+
+            document.getElementById('bitTypeCard').classList.toggle('hidden', !hasReamers);
             document.getElementById('bitCard').classList.toggle('hidden', !has);
             document.getElementById('rockCard').classList.toggle('hidden', !has);
             document.getElementById('resultsContainer').classList.toggle('hidden', !has);
-            if (has) updateBits();
+
+            if (has) {
+                if (hasReamers) {
+                    updateBitTypeTabs();
+                }
+                updateBits();
+            }
+        }
+
+        function updateBitTypeTabs() {
+            const tabsHtml = '<button class="tab-btn active" onclick="selectBitType(\'standard\', this)">Standard Bits</button>' +
+                '<button class="tab-btn" onclick="selectBitType(\'reamer\', this)">Reamers</button>';
+            document.getElementById('bitTypeTabs').innerHTML = tabsHtml;
+        }
+
+        function selectBitType(type, btn) {
+            state.bitType = type;
+            state.bit = null;
+            document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            updateBits();
         }
 
         function updateBits() {
-            const html = '<div class="bit-grid">' + state.drill.bits.map(b =>
-                `<button class="bit-btn" onclick="selectBit(${b}, this)">${b}mm</button>`
-            ).join('') + '</div>';
+            const bits = state.bitType === 'reamer' && state.drill.reamers ? state.drill.reamers : state.drill.bits;
+
+            let html = '<div class="bit-grid">';
+            bits.forEach(b => {
+                const inches = state.bitType === 'reamer' ? `<div class="bit-subtitle">${(b / 25.4).toFixed(1)}"</div>` : '';
+                html += `<button class="bit-btn" onclick="selectBit(${b}, this)">${b}mm${inches}</button>`;
+            });
+            html += '</div>';
+
             document.getElementById('bitContainer').innerHTML = html;
-            
+
             const rocks = '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">' +
                 '<button class="btn" onclick="calculate(1.18, this)" style="width: 100%; margin: 0; padding: 8px;">Soft</button>' +
                 '<button class="btn" onclick="calculate(1.0, this)" style="width: 100%; margin: 0; padding: 8px;">Medium</button>' +
@@ -209,28 +315,125 @@
             state.bit = b;
             document.querySelectorAll('.bit-btn').forEach(x => x.classList.remove('selected'));
             btn.classList.add('selected');
+
+            // Show bolting warning IMMEDIATELY when bolting bit is selected
+            let boltingBox = document.getElementById('boltingWarningBox');
+            if (state.drill && (state.drill.type === 'DD' || state.drill.type === 'DS') && 
+                [33, 35, 38].includes(b)) {
+                boltingBox.classList.add('show');
+                boltingBox.innerHTML = '<strong>⚠️ Bolting Bit Warning:</strong> ' +
+                    'For bolting applications with ' + b + 'mm bits, keep percussion at or below 180 bar. ' +
+                    'Some bit brands are prone to bit head failure at higher percussion pressures. ' +
+                    'Reduce percussion to 180 bar maximum to prevent bit blow-off.';
+            } else {
+                boltingBox.classList.remove('show');
+            }
         }
 
         function calculate(factor, btn) {
             if (!state.drill || !state.bit) return;
-            const k = state.bit <= 51 ? 10500 : 5610;
-            let rpm = Math.round((k / state.bit) * factor);
-            if (state.drill.cap && rpm > state.drill.cap) rpm = state.drill.cap;
+
+            let k, rpm, warningMsg = '';
+
+            if (state.bitType === 'reamer') {
+                k = 13680;
+                rpm = Math.round((k / state.bit) * factor);
+                if (state.drill.cap && rpm > state.drill.cap) rpm = state.drill.cap;
+
+                if (state.drill.type === 'DD') {
+                    warningMsg = '<div class="warning-box"><strong>⚠️ Reaming Mode:</strong> Keep percussion at or below 210 bar. Reaming is very aggressive on DD machines. Monitor bit wear and adjust parameters if needed. If drilling becomes unstable, reduce RPM by 10-20%.</div>';
+                }
+                if (state.drill.type === 'DL' && state.bit === 203) {
+                    warningMsg += '<div class="danger-box"><strong>⚠️ 8" Reamer Out of Spec:</strong> The 203mm (8") reamer exceeds standard manufacturing specifications for DL machines. Use only in exceptional circumstances with extreme caution. Verify machine capability before operation.</div>';
+                }
+            } else {
+                k = state.bit <= 51 ? 10500 : 5610;
+                rpm = Math.round((k / state.bit) * factor);
+                if (state.drill.cap && rpm > state.drill.cap) rpm = state.drill.cap;
+            }
 
             document.getElementById('resultRpm').textContent = rpm;
             document.getElementById('resultDrill').textContent = state.drill.name;
             document.getElementById('resultBit').textContent = state.bit;
+            document.getElementById('resultBitType').textContent = state.bitType === 'reamer' ? 'Reamer' : 'Bit';
             document.getElementById('specRock').textContent = state.drill.rock;
             document.getElementById('specFreq').textContent = state.drill.freq;
             document.getElementById('specPower').textContent = state.drill.power;
             document.getElementById('specModel').textContent = state.drill.name;
 
-            const rockType = factor > 1 ? 'Soft' : factor < 1 ? 'Hard' : 'Medium';
-            document.getElementById('tipsBox').innerHTML = 
-                `<div class="info-box"><strong>💨 ${state.drill.msg}</strong></div>`;
+            let tipsMsg = `<div class="info-box"><strong>💨 ${state.drill.msg}</strong>`;
+            if (state.bitType === 'reamer') {
+                tipsMsg += '<br><br><strong>Reaming Tips:</strong><br>' +
+                    '• Start with lower feed pressure and gradually increase<br>' +
+                    '• Monitor temperature - reduce RPM if bit overheats<br>' +
+                    '• Ensure adequate water flow for cooling and flushing<br>' +
+                    '• Check bit wear frequently during reaming operations';
+            }
+            tipsMsg += '</div>';
+
+            document.getElementById('tipsBox').innerHTML = tipsMsg;
+            document.getElementById('warningBox').innerHTML = warningMsg;
 
             document.getElementById('resultsContainer').classList.add('show');
         }
-    </script>
+    
+function updateStepsUI() {
+    // Step 1: Drill
+    let drill = state.drill;
+    let drillBanner = document.getElementById('step-1');
+    drillBanner.classList.toggle('complete', !!drill);
+    drillBanner.innerHTML = !!drill ? 'Step 1 <span class="step-check">✔</span>' : 'Step 1';
+    // Step 2: Bit type/diameter
+    let bit = state.bit;
+    let bitBanner = document.getElementById('step-2');
+    bitBanner.classList.toggle('complete', !!bit);
+    bitBanner.innerHTML = !!bit ? 'Step 2 <span class="step-check">✔</span>' : 'Step 2';
+    // Step 3: Rock
+    let selectedHardness = document.querySelector('.rock-btn.selected');
+    let rockBanner = document.getElementById('step-3');
+    rockBanner.classList.toggle('complete', !!selectedHardness);
+    rockBanner.innerHTML = !!selectedHardness ? 'Step 3 <span class="step-check">✔</span>' : 'Step 3';
+}
+
+['onDrillChange','selectBit','selectRock'].forEach(fn => {
+    let orig = window[fn];
+    window[fn] = function(...args) {
+        let ret = orig.apply(this, args);
+        setTimeout(updateStepsUI,50);
+        return ret;
+    }
+})
+setTimeout(updateStepsUI, 100);
+
+
+function updateStepsUI() {
+    // Step 1: Drill
+    let drill = state.drill;
+    let drillBanner = document.getElementById('step-1');
+    drillBanner.classList.toggle('complete', !!drill);
+    drillBanner.innerHTML = !!drill ? 'Step 1 <span class="step-check">✔</span>' : 'Step 1';
+    // Step 2: Bit type or diameter
+    let bit = state.bit;
+    let bitBanner = document.getElementById('step-2');
+    bitBanner.classList.toggle('complete', !!bit);
+    bitBanner.innerHTML = !!bit ? 'Step 2 <span class="step-check">✔</span>' : 'Step 2';
+    // Step 3: Rock
+    let selectedHardness = document.querySelector('.rock-btn.selected');
+    let rockBanner = document.getElementById('step-3');
+    rockBanner.classList.toggle('complete', !!selectedHardness);
+    rockBanner.innerHTML = !!selectedHardness ? 'Step 3 <span class="step-check">✔</span>' : 'Step 3';
+}
+
+['onDrillChange','selectBit','selectRock'].forEach(fn => {
+    let orig = window[fn];
+    window[fn] = function(...args) {
+        let ret = orig.apply(this, args);
+        setTimeout(updateStepsUI,50);
+        return ret;
+    }
+})
+setTimeout(updateStepsUI, 100);
+
+</script>
 </body>
 </html>

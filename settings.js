@@ -7,18 +7,29 @@ let settings = {
   language: 'en'
 };
 
-// Load settings from settings.json or localStorage
+// Load settings from localStorage (primary) or settings.json (fallback)
 async function loadSettings() {
-  try {
-    const response = await fetch('settings.json');
-    const data = await response.json();
-    settings = { ...settings, ...data };
-  } catch (e) {
-    // Fallback to localStorage if settings.json not available
-    settings.theme = localStorage.getItem('theme') || settings.theme;
-    settings.units = localStorage.getItem('units') || settings.units;
-    settings.language = localStorage.getItem('language') || settings.language;
+  // Always try localStorage first (it's faster and persists user changes)
+  const savedTheme = localStorage.getItem('theme');
+  const savedUnits = localStorage.getItem('units');
+  const savedLanguage = localStorage.getItem('language');
+  
+  if (savedTheme) settings.theme = savedTheme;
+  if (savedUnits) settings.units = savedUnits;
+  if (savedLanguage) settings.language = savedLanguage;
+  
+  // If nothing in localStorage, try loading from settings.json
+  if (!savedTheme && !savedUnits && !savedLanguage) {
+    try {
+      const response = await fetch('settings.json');
+      const data = await response.json();
+      settings = { ...settings, ...data };
+    } catch (e) {
+      // Use defaults if both fail
+      console.log('Using default settings');
+    }
   }
+  
   applySettings();
 }
 
@@ -30,12 +41,16 @@ function applySettings() {
   } else {
     document.body.classList.remove('dark-mode');
   }
+  
+  // Language can be applied here when you add translation support
+  // For now, it's just stored
 }
 
-// Save a specific setting
+// Save a specific setting to localStorage and apply it
 function saveSetting(key, value) {
   settings[key] = value;
   localStorage.setItem(key, value);
+  console.log(`Saved ${key}: ${value}`);
   applySettings();
 }
 
@@ -46,8 +61,7 @@ function formatLength(lengthMM) {
     return `${lengthMM} mm <small>(${lengthInch} in)</small>`;
   } else {
     const lengthInch = (lengthMM / 25.4).toFixed(2);
-    const lengthMMShow = lengthMM;
-    return `${lengthInch} in <small>(${lengthMMShow} mm)</small>`;
+    return `${lengthInch} in <small>(${lengthMM} mm)</small>`;
   }
 }
 

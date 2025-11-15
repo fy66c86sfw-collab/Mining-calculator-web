@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mining Toolkit - Settings</title>
     <script src="settings.js"></script>
-    <style>
+    <script src="translations.js"></script>
+<style>
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -38,11 +39,11 @@
             background: #555;
             border-color: #666;
         }
-        body.dark-mode .toggle-btn.active {
+        body.dark-mode .toggle-btn:active {
             background: var(--secondary);
         }
         .app-container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             background: white;
             min-height: 100vh;
@@ -61,30 +62,21 @@
             padding: 20px;
         }
         .back-btn {
-            background: var(--secondary);
-            color: white;
+            background: white;
             border: none;
             padding: 10px 20px;
             border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-size: 14px;
-        }
-        .back-btn:hover {
-            opacity: 0.9;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         .card {
             background: white;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--secondary);
-        }
-        .card h2 {
-            margin-top: 0;
-            font-size: 20px;
-            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .setting-group {
             margin-bottom: 25px;
@@ -94,12 +86,6 @@
             font-weight: 600;
             margin-bottom: 10px;
             font-size: 16px;
-        }
-        .setting-group small {
-            display: block;
-            margin-top: 8px;
-            color: #7f8c8d;
-            font-size: 12px;
         }
         .toggle-buttons {
             display: flex;
@@ -111,12 +97,12 @@
             min-width: 100px;
             padding: 12px 20px;
             border: 2px solid var(--border);
-            border-radius: 8px;
             background: white;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            transition: all 0.3s;
+            transition: all 0.2s;
             text-align: center;
         }
         .toggle-btn:hover {
@@ -128,62 +114,61 @@
             color: white;
         }
         .save-notice {
-            background: var(--success);
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 15px;
-            text-align: center;
-            display: none;
-            font-weight: 600;
-        }
-        .save-notice.show {
             display: block;
             animation: fadeIn 0.3s;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .save-notice.show {
+            display: block;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 20px;
+        }
+        small {
+            display: block;
+            margin-top: 8px;
+            color: #777;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="header">
-            <h1>Mining Toolkit Pro</h1>
-            <p style="margin: 5px 0 0 0; font-size: 14px;">Settings</p>
+            <h1 id="appTitle">Mining Toolkit Pro</h1>
+            <p style="margin: 5px 0 0 0; font-size: 14px;" id="settingsSubtitle">Settings</p>
         </div>
         <div class="content">
-            <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+            <button class="back-btn" onclick="window.location.href='index.html'" id="backBtn">← Back</button>
             <div class="card">
-                <h2>App Settings</h2>
+                <h2 id="appSettingsTitle">App Settings</h2>
                 
                 <div class="setting-group">
-                    <label>Theme:</label>
+                    <label id="themeLabel">Theme:</label>
                     <div class="toggle-buttons" id="themeButtons">
-                        <button class="toggle-btn" data-value="light" onclick="setTheme('light')">Light</button>
-                        <button class="toggle-btn" data-value="dark" onclick="setTheme('dark')">Dark</button>
+                        <button class="toggle-btn" data-value="light" onclick="setTheme('light')" id="lightBtn">Light</button>
+                        <button class="toggle-btn" data-value="dark" onclick="setTheme('dark')" id="darkBtn">Dark</button>
                     </div>
-                    <small>Choose between light and dark theme for better visibility underground</small>
+                    <small id="themeDesc">Choose between light and dark theme for better visibility underground</small>
                 </div>
                 
                 <div class="setting-group">
-                    <label>Language:</label>
+                    <label id="languageLabel">Language:</label>
                     <div class="toggle-buttons" id="languageButtons">
-                        <button class="toggle-btn" data-value="en" onclick="setLanguage('en')">English</button>
-                        <button class="toggle-btn" data-value="fr" onclick="setLanguage('fr')">Français</button>
-                        <button class="toggle-btn" data-value="es" onclick="setLanguage('es')">Español</button>
+                        <button class="toggle-btn" data-value="en" onclick="setLanguage('en')" id="englishBtn">English</button>
+                        <button class="toggle-btn" data-value="fr" onclick="setLanguage('fr')" id="frenchBtn">Français</button>
+                        <button class="toggle-btn" data-value="es" onclick="setLanguage('es')" id="spanishBtn">Español</button>
                     </div>
-                    <small>Select your preferred language</small>
+                    <small id="languageDesc">Select your preferred language</small>
                 </div>
                 
                 <div class="setting-group">
-                    <label>Units:</label>
+                    <label id="unitsLabel">Units:</label>
                     <div class="toggle-buttons" id="unitButtons">
-                        <button class="toggle-btn" data-value="metric" onclick="setUnits('metric')">Metric</button>
-                        <button class="toggle-btn" data-value="imperial" onclick="setUnits('imperial')">Imperial</button>
+                        <button class="toggle-btn" data-value="metric" onclick="setUnits('metric')" id="metricBtn">Metric</button>
+                        <button class="toggle-btn" data-value="imperial" onclick="setUnits('imperial')" id="imperialBtn">Imperial</button>
                     </div>
-                    <small>All measurements will display both units side-by-side across the app</small>
+                    <small id="unitsDesc">All measurements will display both units side-by-side across the app</small>
                 </div>
                 
                 <div class="save-notice" id="saveNotice">Settings saved!</div>
@@ -191,10 +176,33 @@
         </div>
     </div>
     <script>
+        // Update language text on the page
+        function updateLanguage() {
+            document.getElementById('appTitle').textContent = t('appTitle');
+            document.getElementById('settingsSubtitle').textContent = t('settings');
+            document.getElementById('backBtn').innerHTML = t('back');
+            document.getElementById('appSettingsTitle').textContent = t('appSettings');
+            document.getElementById('themeLabel').textContent = t('theme');
+            document.getElementById('lightBtn').textContent = t('light');
+            document.getElementById('darkBtn').textContent = t('dark');
+            document.getElementById('themeDesc').textContent = t('themeDesc');
+            document.getElementById('languageLabel').textContent = t('language');
+            document.getElementById('englishBtn').textContent = t('english');
+            document.getElementById('frenchBtn').textContent = t('french');
+            document.getElementById('spanishBtn').textContent = t('spanish');
+            document.getElementById('languageDesc').textContent = t('languageDesc');
+            document.getElementById('unitsLabel').textContent = t('units');
+            document.getElementById('metricBtn').textContent = t('metric');
+            document.getElementById('imperialBtn').textContent = t('imperial');
+            document.getElementById('unitsDesc').textContent = t('unitsDesc');
+            document.getElementById('saveNotice').textContent = t('settingsSaved');
+        }
+
         // Load settings on page load
         window.addEventListener('DOMContentLoaded', async function() {
             await loadSettings();
             updateUI();
+            updateLanguage();
         });
 
         function updateUI() {
@@ -221,6 +229,7 @@
         function setLanguage(value) {
             saveSetting('language', value);
             updateUI();
+            updateLanguage();
             showSaveNotice();
         }
 

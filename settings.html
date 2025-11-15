@@ -34,10 +34,12 @@
             background: #444;
             color: var(--light);
         }
-        body.dark-mode select {
+        body.dark-mode .toggle-btn {
             background: #555;
-            color: var(--light);
             border-color: #666;
+        }
+        body.dark-mode .toggle-btn.active {
+            background: var(--secondary);
         }
         .app-container {
             max-width: 600px;
@@ -84,40 +86,64 @@
             font-size: 20px;
             color: var(--primary);
         }
-        .form-group {
-            margin-bottom: 20px;
+        .setting-group {
+            margin-bottom: 25px;
         }
-        .form-group label {
+        .setting-group label {
             display: block;
             font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            background: white;
-        }
-        .form-group small {
+        .setting-group small {
             display: block;
-            margin-top: 5px;
+            margin-top: 8px;
             color: #7f8c8d;
             font-size: 12px;
+        }
+        .toggle-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 20px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .toggle-btn:hover {
+            border-color: var(--secondary);
+        }
+        .toggle-btn.active {
+            background: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
         }
         .save-notice {
             background: var(--success);
             color: white;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             margin-top: 15px;
             text-align: center;
             display: none;
+            font-weight: 600;
         }
         .save-notice.show {
             display: block;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -131,51 +157,79 @@
             <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
             <div class="card">
                 <h2>App Settings</h2>
-                <div class="form-group">
-                    <label for="themeSetting">Theme:</label>
-                    <select id="themeSetting" onchange="handleSettingChange('theme', this.value)">
-                        <option value="light">Light Mode</option>
-                        <option value="dark">Dark Mode</option>
-                    </select>
+                
+                <div class="setting-group">
+                    <label>Theme:</label>
+                    <div class="toggle-buttons" id="themeButtons">
+                        <button class="toggle-btn" data-value="light" onclick="setTheme('light')">Light</button>
+                        <button class="toggle-btn" data-value="dark" onclick="setTheme('dark')">Dark</button>
+                    </div>
                     <small>Choose between light and dark theme for better visibility underground</small>
                 </div>
-                <div class="form-group">
-                    <label for="languageSetting">Language:</label>
-                    <select id="languageSetting" onchange="handleSettingChange('language', this.value)">
-                        <option value="en">English</option>
-                        <option value="fr">French</option>
-                        <option value="es">Spanish</option>
-                    </select>
+                
+                <div class="setting-group">
+                    <label>Language:</label>
+                    <div class="toggle-buttons" id="languageButtons">
+                        <button class="toggle-btn" data-value="en" onclick="setLanguage('en')">English</button>
+                        <button class="toggle-btn" data-value="fr" onclick="setLanguage('fr')">Français</button>
+                        <button class="toggle-btn" data-value="es" onclick="setLanguage('es')">Español</button>
+                    </div>
                     <small>Select your preferred language</small>
                 </div>
-                <div class="form-group">
-                    <label for="unitSetting">Units:</label>
-                    <select id="unitSetting" onchange="handleSettingChange('units', this.value)">
-                        <option value="metric">Metric (mm, m, kg, t)</option>
-                        <option value="imperial">Imperial (in, ft, yd, lb)</option>
-                    </select>
+                
+                <div class="setting-group">
+                    <label>Units:</label>
+                    <div class="toggle-buttons" id="unitButtons">
+                        <button class="toggle-btn" data-value="metric" onclick="setUnits('metric')">Metric</button>
+                        <button class="toggle-btn" data-value="imperial" onclick="setUnits('imperial')">Imperial</button>
+                    </div>
                     <small>All measurements will display both units side-by-side across the app</small>
                 </div>
+                
                 <div class="save-notice" id="saveNotice">Settings saved!</div>
             </div>
         </div>
     </div>
     <script>
-        // Load and apply settings when page loads
-        window.onload = async function() {
+        // Load settings on page load
+        window.addEventListener('DOMContentLoaded', async function() {
             await loadSettings();
-            document.getElementById('themeSetting').value = settings.theme;
-            document.getElementById('languageSetting').value = settings.language;
-            document.getElementById('unitSetting').value = settings.units;
-        };
+            updateUI();
+        });
 
-        // Handle setting changes
-        function handleSettingChange(key, value) {
-            saveSetting(key, value);
+        function updateUI() {
+            // Update theme buttons
+            document.querySelectorAll('#themeButtons .toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === settings.theme);
+            });
+            // Update language buttons
+            document.querySelectorAll('#languageButtons .toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === settings.language);
+            });
+            // Update unit buttons
+            document.querySelectorAll('#unitButtons .toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === settings.units);
+            });
+        }
+
+        function setTheme(value) {
+            saveSetting('theme', value);
+            updateUI();
             showSaveNotice();
         }
 
-        // Show save notification
+        function setLanguage(value) {
+            saveSetting('language', value);
+            updateUI();
+            showSaveNotice();
+        }
+
+        function setUnits(value) {
+            saveSetting('units', value);
+            updateUI();
+            showSaveNotice();
+        }
+
         function showSaveNotice() {
             const notice = document.getElementById('saveNotice');
             notice.classList.add('show');
